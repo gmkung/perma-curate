@@ -1,0 +1,40 @@
+{
+    "columns": [
+        {
+            "label": "Contract Address",
+            "description": "The address of the smart contract being tagged. Will be store in CAIP-10 format if the chain is properly selected in the UI.",
+            "type": "rich address",
+            "isIdentifier": true
+        },
+        {
+            "label": "Public Name Tag",
+            "description": "The Public Name tag of a contract address indicates a commonly-used name of the smart contract and clearly identifies it to avoid potential confusion. (e.g. Eth2 Deposit Contract).",
+            "type": "text",
+            "isIdentifier": true
+        },
+        {
+            "label": "Project Name",
+            "description": "The name of the project that the contract belongs to. Can be omitted only for contracts which do not belong to a project",
+            "type": "text",
+            "isIdentifier": true
+        },
+        {
+            "label": "UI/Website Link",
+            "description": "The URL of the most popular user interface used to interact with the contract tagged or the URL of the official website of the contract deployer (e.g. https://launchpad.ethereum.org/en/).",
+            "type": "link",
+            "isIdentifier": true
+        },
+        {
+            "label": "Public Note",
+            "description": "The Public Note is a short, mandatory comment field used to add a comment/information about the contract that could not fit in the public name tag (e.g. Official Ethereum 2.0 Beacon Chain deposit contact address).",
+            "type": "text"
+        }
+    ],
+    "values": {
+        "Contract Address": "eip155:100:0x9c58bacc331c9aa871afd802db6379a98e80cedb",
+        "Public Name Tag": "GNO Token",
+        "Project Name": "Gnosis",
+        "UI/Website Link": "https://www.gnosis.io/",
+        "Public Note": "Gnosis' official GNO Token contract on Gnosis Chain"
+    }
+}
