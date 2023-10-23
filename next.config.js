@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  assetPrefix: "",
+  assetPrefix: "./",
   trailingSlash: true,
   output: "export",
   webpack: (config, { isServer, dev }) => {
