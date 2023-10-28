@@ -4,9 +4,10 @@ declare global {
     }
 }
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Contract, ethers } from 'ethers';
 import { JsonRpcProvider } from 'ethers/providers';
+
 
 import { formatEther, parseEther } from '@ethersproject/units';
 
@@ -15,6 +16,9 @@ import klerosCurateABI from '@/utils/abi/kleros-curate-abi.json';
 import arbitratorABI from '@/utils/abi/kleros-liquid-abi.json';
 import tagsItemTemplate from '@/assets/tags-item-template.json';
 import { fetchTags } from '@/utils/getAddressTagsFromSubgraph';
+import { fetchCDN } from '@/utils/getCDNFromSubgraph';
+import { fetchEvidence } from '@/utils/getEvidence';
+import { fetchTokens } from '@/utils/getTokensFromSubgraph';
 
 import { references } from '@/utils/chains';  // Adjust the path according to your folder structure
 
@@ -197,6 +201,7 @@ async function initiateTransactionToCurate(ipfsPath: string): Promise<boolean> {
 
 const Home = ({ }: { items: any }) => {
     //Initiation
+    const [activeList, setActiveList] = useState<"Tags" | "CDN" | "Tokens">("Tags");
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -217,11 +222,24 @@ const Home = ({ }: { items: any }) => {
     const [evidences, setEvidences] = useState<any[]>([]);
     const [entryStatus, setEntryStatus] = useState('');
     const [itemId, setItemId] = useState('');
+    const fileInputRef = useRef(null);
+
 
     useEffect(() => {
         const fetchItems = async () => {
             try {
-                const fetchedItems = await fetchTags();
+                let fetchedItems;
+                switch (activeList) {
+                    case "Tags":
+                        fetchedItems = await fetchTags(); // Assuming fetchTags fetches for Tags
+                        break;
+                    case "CDN":
+                        fetchedItems = await fetchCDN(); // Create a fetchCDN function
+                        break;
+                    case "Tokens":
+                        fetchedItems = await fetchTokens(); // Create a fetchTokens function
+                        break;
+                }
                 setItems(fetchedItems as any);
             } catch (err: any) {
                 setError(err.message);
@@ -231,7 +249,7 @@ const Home = ({ }: { items: any }) => {
         };
 
         fetchItems();
-    }, []);
+    }, [activeList]);
 
 
     const handleEntryClick = async (item: any) => {
@@ -241,7 +259,11 @@ const Home = ({ }: { items: any }) => {
         setItemId(item.itemID)
 
         // Fetch evidences
-        const evidenceData = await item.requests[item.numberOfRequests - 1].evidences; // Assuming you have this function or something similar
+
+        //const evidenceData = await item.requests[item.numberOfRequests - 1].evidences; 
+
+        const evidenceData = await fetchEvidence(item.requests[item.numberOfRequests - 1].evidenceGroup.id)
+
         const formattedEvidences = await Promise.all(
             evidenceData.map(async (e: any) => {
                 const evi = await fetchFromIPFS(e.URI);
@@ -323,8 +345,13 @@ const Home = ({ }: { items: any }) => {
         <div className="bg-gradient-to-br from-purple-900 to-purple-800 min-h-screen text-white font-orbitron p-8">
             <h1 className="text-5xl text-center mb-4 flex justify-center items-center">
                 <img src="https://cryptologos.cc/logos/kleros-pnk-logo.svg?v=026" alt="Kleros" className="mr-4 h-[3rem]" />
-                Kleros Tags
+                Kleros {activeList === "Tags" && (<div>Tags</div>)}{activeList === "CDN" && (<div>CDN</div>)}{activeList === "Tokens" && (<div>Tokens</div>)}
             </h1>
+            <div className="flex space-x-4 mb-4">
+                <button onClick={() => setActiveList("Tags")}>Tags</button>
+                <button onClick={() => setActiveList("CDN")}>CDN</button>
+                <button onClick={() => setActiveList("Tokens")}>Tokens</button>
+            </div>
             <p className="text-xl text-center text-purple-300 mb-12">Crowdsourced address tags for the Ethereum ecosystem.</p>
 
             <div className="w-4/5 mx-auto flex items-center pb-2">
@@ -370,12 +397,51 @@ const Home = ({ }: { items: any }) => {
                                     {reference?.label}
                                 </span>
                             </div>
-                            <div className="items-center space-x-2">
-                                <span>{parts[2]}</span>
-                            </div>
-                            <div><strong>Project:</strong> {item.key2}</div>
-                            <div><strong>Tag/label:</strong> {item.key1}</div>
-                            <div><strong>URL:</strong> {item.key3}</div>
+                            {activeList === "Tags" && (
+                                <div>
+                                    <div className="items-center space-x-2">
+                                        <span>{parts[2]}</span>
+                                    </div>
+                                    <div><strong>Project:</strong> {item.key2}</div>
+                                    <div><strong>Tag/label:</strong> {item.key1}</div>
+                                    <div><strong>URL:</strong> {item.key3}</div>
+                                </div>
+                            )}
+                            {activeList === "Tokens" && (
+                                <div>
+                                    <div className="items-center space-x-2">
+                                        <span>{parts[2]}</span>
+                                    </div>
+                                    {item.props && item.props.find((prop: { label: string, value: string }) => prop.label === "Logo") && (
+                                        <div>
+                                            <img
+                                                src={`https://ipfs.kleros.io/${item.props.find((prop: { label: string, value: string }) => prop.label === "Logo").value}`}
+                                                alt="Logo"
+                                                style={{ width: '100px', height: '100px' }}  // Adjust size as needed
+                                            />
+                                        </div>
+                                    )}
+                                    <div><strong>Ticker:</strong> {item.key2}</div>
+                                    <div><strong>Name:</strong> {item.key1}</div>
+                                </div>
+                            )}
+                            {activeList === "CDN" && (
+                                <div>
+                                    <div className="items-center space-x-2">
+                                        <span>{parts[2]}</span>
+                                    </div>
+                                    <div><strong>(Sub)domain:</strong> {item.key1}</div>
+                                    {item.props && item.props.find((prop: { label: string, value: string }) => prop.label === "Visual proof") && (
+                                        <div>
+                                            <img
+                                                src={`https://ipfs.kleros.io/${item.props.find((prop: { label: string, value: string }) => prop.label === "Visual proof").value}`}
+                                                alt="Visual Proof"
+                                                style={{ width: '100%' }}  // Adjust size as needed
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             <div className="mt-2">
                                 <span className={`px-2 py-1 text-white rounded ${statusColorMap[item.status] || 'bg-gray-400'}`}>
                                     {item.status}

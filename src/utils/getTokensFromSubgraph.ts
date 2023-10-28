@@ -3,7 +3,7 @@
 import client from "@/utils/apollo";
 import { gql } from "@apollo/client";
 
-export async function fetchTags() {
+export async function fetchTokens() {
   const BATCH_SIZE = 1000;
   let allItems = [] as any[];
   let skip = 0;
@@ -13,7 +13,7 @@ export async function fetchTags() {
     const QUERY = gql`
         {
             litems (first: ${BATCH_SIZE}, skip: ${skip}, orderBy:latestRequestSubmissionTime, orderDirection:desc,
-                where:{registryAddress:"0x66260C69d03837016d88c9877e61e08Ef74C59F2"}){
+                where:{registryAddress:"0xee1502e29795ef6c2d60f8d7120596abe3bad990"}){
                   itemID
                   data
                   key0
@@ -49,3 +49,18 @@ export async function fetchTags() {
 
   return allItems;
 }
+
+/*
+requests{
+  evidences {
+      id
+      item {
+          id
+      }
+      timestamp
+      URI
+      arbitrator
+      party
+  }
+}
+*/
