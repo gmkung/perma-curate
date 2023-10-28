@@ -4,7 +4,7 @@ declare global {
     }
 }
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Contract, ethers } from 'ethers';
 import { JsonRpcProvider } from 'ethers/providers';
 
@@ -15,6 +15,8 @@ import '../../styles/globals.css';
 import klerosCurateABI from '@/utils/abi/kleros-curate-abi.json';
 import arbitratorABI from '@/utils/abi/kleros-liquid-abi.json';
 import tagsItemTemplate from '@/assets/tags-item-template.json';
+import CDNItemTemplate from '@/assets/cdn-item-template.json';
+import tokensItemTemplate from '@/assets/tokens-item-template.json';
 import { fetchTags } from '@/utils/getAddressTagsFromSubgraph';
 import { fetchCDN } from '@/utils/getCDNFromSubgraph';
 import { fetchEvidence } from '@/utils/getEvidence';
@@ -24,42 +26,13 @@ import { references } from '@/utils/chains';  // Adjust the path according to yo
 
 import { chainColorMap, statusColorMap } from '@/utils/colorMappings'
 
-// Constants
-const TAGSCONTRACTADDRESS = "0x66260C69d03837016d88c9877e61e08Ef74C59F2";
-const ARBITRATORCONTRACTADDRESS = "0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002";
-const PROVIDER = new JsonRpcProvider('https://rpc.ankr.com/gnosis'); // Assuming Gnosis chain uses xDai's endpoint.
-const CONTRACT = new Contract(TAGSCONTRACTADDRESS, klerosCurateABI, PROVIDER);
-const ARBCONTRACT = new Contract(ARBITRATORCONTRACTADDRESS, arbitratorABI, PROVIDER);
-// Fetching the deposit params
-let submissionBaseDeposit: number;
-let submissionChallengeBaseDeposit: number;
-let removalBaseDeposit: number;
-let removalChallengeBaseDeposit: number;
-let arbitratorExtraData: string;
-let arbitrationCost: number;
-
-CONTRACT.arbitratorExtraData()
-    .then(result => {
-        arbitratorExtraData = result;
-
-        return Promise.all([
-            CONTRACT.submissionBaseDeposit(),
-            CONTRACT.submissionChallengeBaseDeposit(),
-            CONTRACT.removalBaseDeposit(),
-            CONTRACT.removalChallengeBaseDeposit(),
-            ARBCONTRACT.arbitrationCost(arbitratorExtraData)
-        ]);
-    })
-    .then(results => {
-        submissionBaseDeposit = parseFloat(formatEther(results[0]));
-        submissionChallengeBaseDeposit = parseFloat(formatEther(results[1]));
-        removalBaseDeposit = parseFloat(formatEther(results[2]));
-        removalChallengeBaseDeposit = parseFloat(formatEther(results[3]));
-        arbitrationCost = parseFloat(formatEther(results[4]));
-    })
-    .catch(error => {
-        console.error("Error fetching deposit params:", error);
-    });
+type DepositParamsType = {
+    submissionBaseDeposit: number;
+    submissionChallengeBaseDeposit: number;
+    removalBaseDeposit: number;
+    removalChallengeBaseDeposit: number;
+    arbitrationCost: number;
+} | null;
 
 const postJSONtoKlerosIPFS = async (object: Record<string, any>) => {
     const json_string = JSON.stringify(object);
@@ -96,8 +69,11 @@ const fetchFromIPFS = async (ipfsURI: string) => {
     }
 };
 
-async function performEvidenceBasedRequest(itemId: string, evidenceTitle: string, evidenceText: string, requestType: string): Promise<boolean> {
+async function performEvidenceBasedRequest(curateContractAddress: string, depositParams: DepositParamsType, itemId: string, evidenceTitle: string, evidenceText: string, requestType: string): Promise<boolean> {
     try {
+        if (!depositParams) {
+            throw new Error('depositParams is null');
+        }
         // Construct the JSON object with title and description
         const evidenceObject = {
             title: evidenceTitle,  // Add your desired title
@@ -123,7 +99,7 @@ async function performEvidenceBasedRequest(itemId: string, evidenceTitle: string
         await window.ethereum.request({ method: 'eth_requestAccounts' });
 
         // Create an instance of the contract
-        const contract = new Contract(TAGSCONTRACTADDRESS, klerosCurateABI, signer);
+        const contract = new Contract(curateContractAddress, klerosCurateABI, signer);
 
         let transactionResponse;
         let etherAmount;
@@ -134,15 +110,15 @@ async function performEvidenceBasedRequest(itemId: string, evidenceTitle: string
                 transactionResponse = await contract.submitEvidence(itemId, ipfsURL, { value: etherAmount });
                 break;
             case 'RegistrationRequested':
-                etherAmount = ethers.parseEther((arbitrationCost + submissionChallengeBaseDeposit).toString()); // adjust the ether amount calculation as needed
+                etherAmount = ethers.parseEther((depositParams.arbitrationCost + depositParams.submissionChallengeBaseDeposit).toString()); // adjust the ether amount calculation as needed
                 transactionResponse = await contract.challengeRequest(itemId, ipfsURL, { value: etherAmount });
                 break;
             case 'Registered':
-                etherAmount = ethers.parseEther((arbitrationCost + removalBaseDeposit).toString()); // adjust the ether amount calculation as needed
+                etherAmount = ethers.parseEther((depositParams.arbitrationCost + depositParams.removalBaseDeposit).toString()); // adjust the ether amount calculation as needed
                 transactionResponse = await contract.removeItem(itemId, ipfsURL, { value: etherAmount });
                 break;
             case 'ClearingRequested':
-                etherAmount = ethers.parseEther((arbitrationCost + removalChallengeBaseDeposit).toString()); // adjust the ether amount calculation as needed
+                etherAmount = ethers.parseEther((depositParams.arbitrationCost + depositParams.removalChallengeBaseDeposit).toString()); // adjust the ether amount calculation as needed
                 transactionResponse = await contract.challengeRequest(itemId, ipfsURL, { value: etherAmount });
                 break;
             default:
@@ -163,8 +139,11 @@ async function performEvidenceBasedRequest(itemId: string, evidenceTitle: string
 }
 
 
-async function initiateTransactionToCurate(ipfsPath: string): Promise<boolean> {
+async function initiateTransactionToCurate(curateContractAddress: string, depositParams: DepositParamsType, ipfsPath: string): Promise<boolean> {
     try {
+        if (!depositParams) {
+            throw new Error('depositParams is null');
+        }
         // Ensure MetaMask or an equivalent provider is available
         if (!window.ethereum) {
             throw new Error("Ethereum provider not found!");
@@ -178,10 +157,10 @@ async function initiateTransactionToCurate(ipfsPath: string): Promise<boolean> {
         await window.ethereum.request({ method: 'eth_requestAccounts' });
 
         // Create an instance of the contract
-        const contract = new Contract(TAGSCONTRACTADDRESS, klerosCurateABI, signer);
+        const contract = new Contract(curateContractAddress, klerosCurateABI, signer);
 
         // Define the ether amount you want to send. This is just an example; adjust accordingly.
-        const etherAmount = ethers.parseEther((arbitrationCost + submissionBaseDeposit).toString()); // calculating ETH/xDai costs using arbitrationCost+submissionBaseDeposit
+        const etherAmount = ethers.parseEther((depositParams.arbitrationCost + depositParams.submissionBaseDeposit).toString()); // calculating ETH/xDai costs using arbitrationCost+submissionBaseDeposit
 
         // Send the transaction
         const transactionResponse = await contract.addItem(ipfsPath, { value: etherAmount });
@@ -202,6 +181,8 @@ async function initiateTransactionToCurate(ipfsPath: string): Promise<boolean> {
 const Home = ({ }: { items: any }) => {
     //Initiation
     const [activeList, setActiveList] = useState<"Tags" | "CDN" | "Tokens">("Tags");
+    const [registryDropdownOpen, setRegistryDropdownOpen] = useState(false);
+
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -222,8 +203,68 @@ const Home = ({ }: { items: any }) => {
     const [evidences, setEvidences] = useState<any[]>([]);
     const [entryStatus, setEntryStatus] = useState('');
     const [itemId, setItemId] = useState('');
-    const fileInputRef = useRef(null);
+    const [isImageUploadSuccessful, setIsImageUploadSuccessful] = useState(false);
 
+    //contract state management
+    const [curateContractAddress, setCurateContractAddress] = useState("");
+    const [depositParams, setDepositParams] = useState<DepositParamsType>(null);
+
+
+    useEffect(() => {
+        switch (activeList) {
+            case "Tags":
+                setCurateContractAddress("0x66260C69d03837016d88c9877e61e08Ef74C59F2");
+                break;
+            case "CDN":
+                setCurateContractAddress("0x957a53a994860be4750810131d9c876b2f52d6e1");
+                break;
+            case "Tokens":
+                setCurateContractAddress("0xee1502e29795ef6c2d60f8d7120596abe3bad990");
+                break;
+            default:
+                console.error("Invalid active list type:", activeList);
+        }
+    }, [activeList]);
+
+    useEffect(() => {
+        const ARBITRATORCONTRACTADDRESS = "0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002";
+        const PROVIDER = new JsonRpcProvider('https://rpc.ankr.com/gnosis');
+        const CONTRACT = new Contract(curateContractAddress, klerosCurateABI, PROVIDER);
+        const ARBCONTRACT = new Contract(ARBITRATORCONTRACTADDRESS, arbitratorABI, PROVIDER);
+
+        let isMounted = true;  // To handle cleanup
+
+        CONTRACT.arbitratorExtraData()
+            .then(result => {
+                const arbitratorExtraData = result;
+
+                return Promise.all([
+                    CONTRACT.submissionBaseDeposit(),
+                    CONTRACT.submissionChallengeBaseDeposit(),
+                    CONTRACT.removalBaseDeposit(),
+                    CONTRACT.removalChallengeBaseDeposit(),
+                    ARBCONTRACT.arbitrationCost(arbitratorExtraData)
+                ]);
+            })
+            .then(results => {
+                if (isMounted) {  // Only update state if component is still mounted
+                    setDepositParams({
+                        submissionBaseDeposit: parseFloat(formatEther(results[0])),
+                        submissionChallengeBaseDeposit: parseFloat(formatEther(results[1])),
+                        removalBaseDeposit: parseFloat(formatEther(results[2])),
+                        removalChallengeBaseDeposit: parseFloat(formatEther(results[3])),
+                        arbitrationCost: parseFloat(formatEther(results[4]))
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching deposit params:", error);
+            });
+
+        return () => {
+            isMounted = false;  // Cleanup
+        };
+    }, [curateContractAddress]);
 
     useEffect(() => {
         const fetchItems = async () => {
@@ -304,24 +345,56 @@ const Home = ({ }: { items: any }) => {
 
     const handleFormSubmit = async (event: any) => {
         event.preventDefault();
+        // Check if depositParams is null and throw an error if it is
+
+        if (!depositParams) {
+            throw new Error('depositParams is null');
+        }
 
         const formData = new FormData(event.target);
-        const dataObject = {
-            "Contract Address": formData.get("contractAddress"),
-            "Address": formData.get("address"),
-            "Public Name Tag": formData.get("publicNameTag"),
-            "Project Name": formData.get("projectName"),
-            "UI/Website Link": formData.get("uiLink"),
-            "Public Note": formData.get("publicNote")
-        };
+        let dataObject = {};
+
+        switch (activeList) {
+            case 'Tags':
+                dataObject = {
+                    "Contract Address": formData.get("contractAddress"),
+                    "Public Name Tag": formData.get("publicNameTag"),
+                    "Project Name": formData.get("projectName"),
+                    "UI/Website Link": formData.get("uiLink"),
+                    "Public Note": formData.get("publicNote")
+                };
+                break;
+            case 'CDN':
+                dataObject = {
+                    "Contract Address": formData.get("contractAddress"),
+                    "Domain name": formData.get("domainName"),
+                    "Visual proof": document.getElementById("visualProof")?.getAttribute("data-uri"),
+                };
+                break;
+            case 'Tokens':
+                dataObject = {
+                    "Address": formData.get("contractAddress"),
+                    "Name": formData.get("name"),
+                    "Symbol": formData.get("symbol"),
+                    "Decimals": formData.get("decimals"),
+                    "Logo": document.getElementById("logoImage")?.getAttribute("data-uri")
+                };
+                break;
+
+
+
+            default:
+                console.error("Invalid active list type:", activeList);
+        }
 
         const formattedData = {
-            ...tagsItemTemplate,
+            ...(activeList === 'Tags' ? tagsItemTemplate :
+                activeList === 'CDN' ? CDNItemTemplate :
+                    activeList === 'Tokens' ? tokensItemTemplate :
+                        {}),
             values: dataObject
         };
-
         console.log(formattedData);
-
 
         // Step 3: Store the JSON object in IPFS using Kleros's node
         const ipfsPath = await postJSONtoKlerosIPFS(formattedData);
@@ -329,7 +402,7 @@ const Home = ({ }: { items: any }) => {
 
         // Step 4: Initiate a transaction to Curate's contract (Placeholder)
         // You will need a function that interacts with the Ethereum blockchain to submit the data to Curate's contract.
-        const transactionSuccess = await initiateTransactionToCurate(ipfsPath);
+        const transactionSuccess = await initiateTransactionToCurate(curateContractAddress, depositParams, ipfsPath);
 
         // Step 5: Close the pop-up
         if (transactionSuccess) {
@@ -341,18 +414,79 @@ const Home = ({ }: { items: any }) => {
         }
     };
 
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        setIsImageUploadSuccessful(false);
+
+        let file;
+        if (event.target.files && event.target.files.length > 0) {
+            file = event.target.files[0];
+        } else return;
+
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.readAsArrayBuffer(file);
+
+        reader.onload = async () => {
+            if (reader.result instanceof ArrayBuffer) {
+                const buffer_data = Array.from(new Uint8Array(reader.result));
+
+                const final_dict = {
+                    "fileName": "image.png",
+                    "buffer": { "type": "Buffer", "data": buffer_data }
+                };
+
+                try {
+                    const response = await fetch("https://ipfs.kleros.io/add", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(final_dict)
+                    });
+
+                    const responseData = await response.json();
+                    console.log("Upload results: " + responseData)
+                    if (responseData && responseData.data[0].hash) {
+                        let visualProofElement
+                        switch (activeList) {
+                            case "CDN":
+                                visualProofElement = document.getElementById("visualProof");
+                                break;
+                            case "Tokens":
+                                visualProofElement = document.getElementById("logoImage");
+                        }
+                        if (visualProofElement) {
+
+                            visualProofElement.setAttribute("data-uri", "/ipfs/" + responseData.data[0].hash);
+                            setIsImageUploadSuccessful(true);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Failed to upload image to IPFS:", error);
+                }
+            }
+        };
+    }
+
+
     return (
         <div className="bg-gradient-to-br from-purple-900 to-purple-800 min-h-screen text-white font-orbitron p-8">
             <h1 className="text-5xl text-center mb-4 flex justify-center items-center">
                 <img src="https://cryptologos.cc/logos/kleros-pnk-logo.svg?v=026" alt="Kleros" className="mr-4 h-[3rem]" />
-                Kleros {activeList === "Tags" && (<div>Tags</div>)}{activeList === "CDN" && (<div>CDN</div>)}{activeList === "Tokens" && (<div>Tokens</div>)}
+                Kleros {" {"}
+                <span className="relative">
+                    <button onClick={() => setRegistryDropdownOpen(!registryDropdownOpen)} className="font-bold">
+                        {activeList}{"}"}
+                    </button>
+                    {registryDropdownOpen && (
+                        <div className="absolute z-10 mt-2 bg-white border border-gray-300 rounded shadow-xl">
+                            <button onClick={() => { setActiveList("Tags"); setRegistryDropdownOpen(false) }} className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Tags</button>
+                            <button onClick={() => { setActiveList("CDN"); setRegistryDropdownOpen(false) }} className="block px-4 py-2 text-gray-800 hover:bg-gray-100">CDN</button>
+                            <button onClick={() => { setActiveList("Tokens"); setRegistryDropdownOpen(false) }} className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Tokens</button>
+                        </div>
+                    )}
+                </span>
             </h1>
-            <div className="flex space-x-4 mb-4">
-                <button onClick={() => setActiveList("Tags")}>Tags</button>
-                <button onClick={() => setActiveList("CDN")}>CDN</button>
-                <button onClick={() => setActiveList("Tokens")}>Tokens</button>
-            </div>
-            <p className="text-xl text-center text-purple-300 mb-12">Crowdsourced address tags for the Ethereum ecosystem.</p>
+            <p className="text-xl text-center text-purple-300 mb-12">Crowdsourced contract metadata for the Ethereum ecosystem.</p>
 
             <div className="w-4/5 mx-auto flex items-center pb-2">
                 <label className="bg-purple-600 p-2 rounded-l-lg text-white">Search</label>
@@ -367,91 +501,96 @@ const Home = ({ }: { items: any }) => {
 
             <p className="text-center text-xl mb-6">
 
-                Total entries: {filteredData.length}
+                Total entries: {loading ? (<i style={{ fontSize: '0.8em', color: 'grey' }}>calculating...</i>) : (<> {filteredData.length} </>)}
+
                 <button onClick={() => setIsModalOpen(true)} className="ml-4 bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-500">
                     Add Entry
                 </button>
             </p>
 
-            {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '2rem' }}>
-                    <img src="https://assets.materialup.com/uploads/92425af1-601b-486e-ad06-1de737628ca0/preview.gif" alt="Loading..." style={{ height: '8rem' }} />
-                </div>
-            ) : (null)}
+            {
+                loading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '2rem' }}>
+                        <img src="https://assets.materialup.com/uploads/92425af1-601b-486e-ad06-1de737628ca0/preview.gif" alt="Loading..." style={{ height: '8rem' }} />
+                    </div>
+                ) : (null)
+            }
+            {
+                !loading ? (
+                    <div className="w-4/5 mx-auto grid grid-cols-2 gap-6">
+                        {displayedData.map((item: any, index: number) => {
+                            const parts = item.key0.split(':');
+                            const keyForReference = `${parts[0]}:${parts[1]}`;
+                            const reference = references.find(ref => `${ref.namespaceId}:${ref.id}` === keyForReference);
 
-            <div className="w-4/5 mx-auto grid grid-cols-2 gap-6">
-                {displayedData.map((item: any, index: number) => {
-                    const parts = item.key0.split(':');
-                    const keyForReference = `${parts[0]}:${parts[1]}`;
-                    const reference = references.find(ref => `${ref.namespaceId}:${ref.id}` === keyForReference);
+                            return (
+                                <div
+                                    key={index}
+                                    className="bg-purple-600 p-4 rounded-lg break-words transform transition-all duration-150 hover:shadow-2xl active:scale-95"
+                                    onClick={() => handleEntryClick(item)}
+                                >
 
-                    return (
-                        <div
-                            key={index}
-                            className="bg-purple-600 p-4 rounded-lg break-words transform transition-all duration-150 hover:shadow-2xl active:scale-95"
-                            onClick={() => handleEntryClick(item)}
-                        >
-
-                            <div className="mt-1">
-                                <strong>Chain:</strong> <span className={`px-1 py-0 text-white rounded ${chainColorMap[keyForReference] || 'bg-gray-400'}`}>
-                                    {reference?.label}
-                                </span>
-                            </div>
-                            {activeList === "Tags" && (
-                                <div>
-                                    <div className="items-center space-x-2">
-                                        <span>{parts[2]}</span>
+                                    <div className="mt-1">
+                                        <strong>Chain:</strong> <span className={`px-1 py-0 text-white rounded ${chainColorMap[keyForReference] || 'bg-gray-400'}`}>
+                                            {reference?.label}
+                                        </span>
                                     </div>
-                                    <div><strong>Project:</strong> {item.key2}</div>
-                                    <div><strong>Tag/label:</strong> {item.key1}</div>
-                                    <div><strong>URL:</strong> {item.key3}</div>
-                                </div>
-                            )}
-                            {activeList === "Tokens" && (
-                                <div>
-                                    <div className="items-center space-x-2">
-                                        <span>{parts[2]}</span>
-                                    </div>
-                                    {item.props && item.props.find((prop: { label: string, value: string }) => prop.label === "Logo") && (
+                                    {activeList === "Tags" && (
                                         <div>
-                                            <img
-                                                src={`https://ipfs.kleros.io/${item.props.find((prop: { label: string, value: string }) => prop.label === "Logo").value}`}
-                                                alt="Logo"
-                                                style={{ width: '100px', height: '100px' }}  // Adjust size as needed
-                                            />
+                                            <div className="items-center space-x-2">
+                                                <span>{parts[2]}</span>
+                                            </div>
+                                            <div><strong>Project:</strong> {item.key2}</div>
+                                            <div><strong>Tag/label:</strong> {item.key1}</div>
+                                            <div><strong>URL:</strong> {item.key3}</div>
                                         </div>
                                     )}
-                                    <div><strong>Ticker:</strong> {item.key2}</div>
-                                    <div><strong>Name:</strong> {item.key1}</div>
-                                </div>
-                            )}
-                            {activeList === "CDN" && (
-                                <div>
-                                    <div className="items-center space-x-2">
-                                        <span>{parts[2]}</span>
-                                    </div>
-                                    <div><strong>(Sub)domain:</strong> {item.key1}</div>
-                                    {item.props && item.props.find((prop: { label: string, value: string }) => prop.label === "Visual proof") && (
+                                    {activeList === "Tokens" && (
                                         <div>
-                                            <img
-                                                src={`https://ipfs.kleros.io/${item.props.find((prop: { label: string, value: string }) => prop.label === "Visual proof").value}`}
-                                                alt="Visual Proof"
-                                                style={{ width: '100%' }}  // Adjust size as needed
-                                            />
+                                            <div className="items-center space-x-2">
+                                                <span>{parts[2]}</span>
+                                            </div>
+                                            {item.props && item.props.find((prop: { label: string, value: string }) => prop.label === "Logo") && (
+                                                <div>
+                                                    <img
+                                                        src={`https://ipfs.kleros.io/${item.props.find((prop: { label: string, value: string }) => prop.label === "Logo").value}`}
+                                                        alt="Logo"
+                                                        style={{ width: '100px', height: '100px' }}  // Adjust size as needed
+                                                    />
+                                                </div>
+                                            )}
+                                            <div><strong>Ticker:</strong> {item.key2}</div>
+                                            <div><strong>Name:</strong> {item.key1}</div>
                                         </div>
                                     )}
+                                    {activeList === "CDN" && (
+                                        <div>
+                                            <div className="items-center space-x-2">
+                                                <span>{parts[2]}</span>
+                                            </div>
+                                            <div><strong>(Sub)domain:</strong> {item.key1}</div>
+                                            {item.props && item.props.find((prop: { label: string, value: string }) => prop.label === "Visual proof") && (
+                                                <div>
+                                                    <img
+                                                        src={`https://ipfs.kleros.io/${item.props.find((prop: { label: string, value: string }) => prop.label === "Visual proof").value}`}
+                                                        alt="Visual Proof"
+                                                        style={{ width: '100%' }}  // Adjust size as needed
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                    <div className="mt-2">
+                                        <span className={`px-2 py-1 text-white rounded ${statusColorMap[item.status] || 'bg-gray-400'}`}>
+                                            {item.status}
+                                        </span>
+                                    </div>
                                 </div>
-                            )}
-                            <div className="mt-2">
-                                <span className={`px-2 py-1 text-white rounded ${statusColorMap[item.status] || 'bg-gray-400'}`}>
-                                    {item.status}
-                                </span>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-
+                            );
+                        })}
+                    </div>
+                ) : (null)
+            }
 
 
             <div className="w-4/5 mx-auto mt-12 flex justify-between">
@@ -488,167 +627,215 @@ const Home = ({ }: { items: any }) => {
                 © 2023 Kleros Tags. All rights reserved.
             </footer>
 
-            {isModalOpen && (
-                <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white p-8 rounded-lg w-1/2 h-8/10 relative overflow-y-auto">
-                        <button onClick={() => setIsModalOpen(false)} className="absolute top-2 right-2 text-gray-800">X</button>
-                        <form onSubmit={handleFormSubmit}>
-                            {/* Contract Address */}
-                            <div className="mb-1">
-                                <label htmlFor="contractAddress" className="block text-sm font-bold mb-2 text-gray-800">Contract Address:</label>
-                                <input type="text" id="contractAddress" name="contractAddress" placeholder="Enter contract address" className="w-full p-2 border rounded text-gray-800" required />
-                            </div>
-
-                            {/* Address */}
-                            <div className="mb-1">
-                                <label htmlFor="address" className="block text-sm font-bold mb-2 text-gray-800">Address:</label>
-                                <input type="text" id="address" name="address" placeholder="Enter address" className="w-full p-2 border rounded text-gray-800" required />
-                            </div>
-
-                            {/* Public Name Tag */}
-                            <div className="mb-1">
-                                <label htmlFor="publicNameTag" className="block text-sm font-bold mb-2 text-gray-800">Public Name Tag:</label>
-                                <input type="text" id="publicNameTag" name="publicNameTag" placeholder="Enter public name tag" className="w-full p-2 border rounded text-gray-800" required />
-                            </div>
-
-                            {/* Project Name */}
-                            <div className="mb-1">
-                                <label htmlFor="projectName" className="block text-sm font-bold mb-2 text-gray-800">Project Name:</label>
-                                <input type="text" id="projectName" name="projectName" placeholder="Enter project name" className="w-full p-2 border rounded text-gray-800" required />
-                            </div>
-
-                            {/* UI/Website Link */}
-                            <div className="mb-1">
-                                <label htmlFor="uiLink" className="block text-sm font-bold mb-2 text-gray-800">UI/Website Link:</label>
-                                <input type="url" id="uiLink" name="uiLink" placeholder="Enter UI or website link" className="w-full p-2 border rounded text-gray-800" required />
-                            </div>
-
-                            {/* Public Note */}
-                            <div className="mb-1">
-                                <label htmlFor="publicNote" className="block text-sm font-bold mb-2 text-gray-800">Public Note:</label>
-                                <textarea id="publicNote" name="publicNote" placeholder="Enter public note" className="w-full p-2 border rounded text-gray-800" rows={4}></textarea>
-                            </div>
-                            <p className="text-gray-600">Submission Base Deposit: {submissionBaseDeposit + arbitrationCost} xDAi</p>
-                            <button type="submit" className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">Submit</button>
-                        </form>
-                    </div>
-                </div>
-            )}
-            {isDetailsModalOpen && (
-                <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white rounded-lg w-3/4 h-3/4 relative text-gray-800 flex flex-col overflow-y-hidden">
-                        <button onClick={() => { setIsDetailsModalOpen(false); setIsConfirmationOpen(false) }} className="absolute top-2 right-2 z-10">X</button>
-
-                        {/* Confirmation Box */}
-                        {isConfirmationOpen && (
-                            <div className="fixed top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 w-3/4 bg-gray-100 rounded-lg p-6 text-gray-800 flex flex-col space-y-4">
-                                <h3>
-                                    {(() => {
-                                        switch (evidenceConfirmationType) {
-                                            case 'Evidence': return "Enter the evidence message you want to submit";
-                                            case 'RegistrationRequested': return "Provide a reason for challenging this entry";
-                                            case 'Registered': return "Provide a reason for removing this entry";
-                                            case 'ClearingRequested': return "Provide a reason for challenging this removal request";
-                                            default: return "Default message";
-                                        }
-                                    })()}
-                                </h3>
-                                <h5>Message title</h5>
-                                <textarea
-                                    className="w-full p-2 border rounded"
-                                    rows={1}
-                                    value={evidenceTitle}
-                                    onChange={e => setEvidenceTitle(e.target.value)}
-                                ></textarea>
-                                <h5>Evidence message</h5>
-                                <textarea
-                                    className="w-full p-2 border rounded"
-                                    rows={3}
-                                    value={evidenceText}
-                                    onChange={e => setEvidenceText(e.target.value)}
-                                ></textarea>
-                                <div className="flex justify-end space-x-4">
-                                    <button
-                                        onClick={() => setIsConfirmationOpen(false)}
-                                        className="px-4 py-2 border rounded">
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={async () => {
-                                            let result = false; // a flag to check if the function execution was successful
-                                            result = await performEvidenceBasedRequest(itemId, evidenceTitle, evidenceText, evidenceConfirmationType)
-
-
-                                            // Check if the function was executed successfully
-                                            if (result) {
-
-                                                setIsDetailsModalOpen(false);
-                                            }
-                                        }}
-                                        className="px-4 py-2 bg-blue-500 text-white rounded">
-                                        Confirm
-                                    </button>
+            {
+                isModalOpen && (
+                    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
+                        <div className="bg-white p-8 rounded-lg w-1/2 h-8/10 relative overflow-y-auto">
+                            <button onClick={() => setIsModalOpen(false)} className="absolute top-2 right-2 text-gray-800">X</button>
+                            <form onSubmit={handleFormSubmit}>
+                                {/* Contract Address */}
+                                <div className="mb-1">
+                                    <label htmlFor="contractAddress" className="block text-sm font-bold mb-2 text-gray-800">Contract Address:</label>
+                                    <input type="text" id="contractAddress" name="contractAddress" placeholder="Enter contract address" className="w-full p-2 border rounded text-gray-800" required />
                                 </div>
-                            </div>
-                        )}
+                                {activeList === 'Tags' && (
+                                    <>
+                                        {/* Public Name Tag */}
 
-
-                        {/* Status-based Button */}
-                        <button
-                            onClick={() => { setIsConfirmationOpen(true); setEvidenceConfirmationType(entryStatus); }} // Adjust this if you want a different confirmation for different actions
-                            className={`absolute top-2 right-16 z-10 rounded-full px-4 py-2 shadow-sm transition-colors
-                ${entryStatus === "Registered" ? "bg-orange-500 text-white" :
-                                    entryStatus === "RegistrationRequested" ? "bg-red-500 text-white" :
-                                        "bg-red-500 text-white"}`}
-                        >
-                            {entryStatus === "Registered" && "Remove entry"}
-                            {entryStatus === "RegistrationRequested" && "Challenge registration"}
-                            {entryStatus === "ClearingRequested" && "Challenge removal"}
-                        </button>
-
-                        {/* DETAILS */}
-                        <div className="p-8 overflow-y-auto flex-grow "> {/* Added margin-top to account for the confirmation box */}
-                            <h2 className="text-xl font-semibold mb-4">Entry details</h2>
-                            <div className="p-4 mb-4 border-b-2 border-gray-200">
-                                <span className={`px-2 py-1 text-white rounded ${statusColorMap[entryStatus]}`}>
-                                    {entryStatus}
-                                </span>
-                                {detailsData && Object.entries(detailsData).map(([key, value], idx) => (
-                                    <div key={idx}>
-                                        <strong>{key}:</strong> {value as React.ReactNode}
-                                    </div>
-                                ))}
-
-                            </div>
-
-
-                            {/* EVIDENCES */}
-                            <div className="space-y-4">
-                                <div className="flex justify-between items-center">
-                                    <h2 className="text-xl mb-4">Evidences</h2>
-                                    <button
-                                        onClick={() => { setIsConfirmationOpen(true); setEvidenceConfirmationType("Evidence"); }} // Trigger the confirmation for submitting evidence
-                                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                                        Submit Evidence
-                                    </button>
-                                </div>
-                                {evidences.length > 0 ? (
-                                    evidences.map((evidence, idx) => (
-                                        <div key={idx} className="p-3 bg-gray-100 rounded font-serif shadow-lg">
-                                            <div className="mb-2"><strong>Title:</strong> {evidence.title}</div>
-                                            <div className="mb-2"><strong>Description:</strong> {evidence.description}</div>
-                                            <div className="mb-2"><strong>Time:</strong> {evidence.time}</div>
-                                            <div><strong>Party:</strong> {evidence.party}</div>
+                                        <div className="mb-1">
+                                            <label htmlFor="publicNameTag" className="block text-sm font-bold mb-2 text-gray-800">Public Name Tag:</label>
+                                            <input type="text" id="publicNameTag" name="publicNameTag" placeholder="Enter public name tag" className="w-full p-2 border rounded text-gray-800" required />
                                         </div>
-                                    ))
-                                ) : (
-                                    <div className="text-light-gray italic">No evidence submitted yet...</div>
+
+                                        {/* Project Name */}
+                                        <div className="mb-1">
+                                            <label htmlFor="projectName" className="block text-sm font-bold mb-2 text-gray-800">Project Name:</label>
+                                            <input type="text" id="projectName" name="projectName" placeholder="Enter project name" className="w-full p-2 border rounded text-gray-800" required />
+                                        </div>
+
+                                        {/* UI/Website Link */}
+                                        <div className="mb-1">
+                                            <label htmlFor="uiLink" className="block text-sm font-bold mb-2 text-gray-800">UI/Website Link:</label>
+                                            <input type="url" id="uiLink" name="uiLink" placeholder="Enter UI or website link" className="w-full p-2 border rounded text-gray-800" required />
+                                        </div>
+
+                                        {/* Public Note */}
+                                        <div className="mb-1">
+                                            <label htmlFor="publicNote" className="block text-sm font-bold mb-2 text-gray-800">Public Note:</label>
+                                            <textarea id="publicNote" name="publicNote" placeholder="Enter public note" className="w-full p-2 border rounded text-gray-800" rows={4}></textarea>
+                                        </div>
+
+                                    </>
                                 )}
+                                {activeList === 'CDN' && (
+                                    <>
+                                        {/* Domain Name */}
+                                        <div className="mb-1">
+                                            <label htmlFor="domainName" className="block text-sm font-bold mb-2 text-gray-800">Domain Name:</label>
+                                            <input type="text" id="domainName" name="domainName" placeholder="Enter domain name" className="w-full p-2 border rounded text-gray-800" required />
+                                        </div>
+
+                                        {/* Visual Proof */}
+                                        <div className="mb-1">
+                                            <label className="block text-sm font-bold mb-2 text-gray-800">Visual Proof:</label>
+                                            <input type="file" data-uri="" id="visualProof" name="visualProof" accept="image/*" onChange={handleImageUpload} className="w-full p-2 border rounded text-gray-800" required />
+                                        </div>
+
+                                        {/* ... The rest of your fields here ... */}
+                                    </>
+                                )}
+                                {activeList === 'Tokens' && (
+                                    <>
+                                        <div className="mb-1">
+                                            <label htmlFor="name" className="block text-sm font-bold mb-2 text-gray-800">Name:</label>
+                                            <input type="text" id="name" name="name" maxLength={40} placeholder="Enter name" className="w-full p-2 border rounded text-gray-800" required />
+                                        </div>
+                                        <div className="mb-1">
+                                            <label htmlFor="symbol" className="block text-sm font-bold mb-2 text-gray-800">Symbol:</label>
+                                            <input type="text" id="symbol" name="symbol" maxLength={20} placeholder="Enter symbol" className="w-full p-2 border rounded text-gray-800" required />
+                                        </div>
+                                        <div className="mb-1">
+                                            <label htmlFor="decimals" className="block text-sm font-bold mb-2 text-gray-800">Decimals:</label>
+                                            <input type="number" id="decimals" name="decimals" placeholder="Enter decimals" className="w-full p-2 border rounded text-gray-800" required />
+                                        </div>
+                                        <div className="mb-1">
+                                            <label className="block text-sm font-bold mb-2 text-gray-800">Logo:</label>
+                                            <input type="file" data-uri="" id="logoImage" name="logoImage" accept=".png" onChange={handleImageUpload} className="w-full p-2 border rounded text-gray-800" required />
+                                        </div>
+                                    </>
+                                )}
+                                {depositParams ? (<p className="text-gray-600">Submission Base Deposit: {depositParams.submissionBaseDeposit + depositParams.arbitrationCost} xDAi</p>) : (null)}
+
+                                <button
+                                    type="submit"
+                                    className={`bg-blue-500 text-white p-2 rounded ${(activeList !== 'Tags' && !isImageUploadSuccessful) ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"}`}
+                                    disabled={activeList !== 'Tags' && !isImageUploadSuccessful}
+                                >
+                                    Submit
+                                </button>
+
+
+                            </form>
+                        </div>
+                    </div>
+                )
+            }
+            {
+                isDetailsModalOpen && (
+                    <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
+                        <div className="bg-white rounded-lg w-3/4 h-3/4 relative text-gray-800 flex flex-col overflow-y-hidden">
+                            <button onClick={() => { setIsDetailsModalOpen(false); setIsConfirmationOpen(false) }} className="absolute top-2 right-2 z-10">X</button>
+
+                            {/* Confirmation Box */}
+                            {isConfirmationOpen && (
+                                <div className="fixed top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 w-3/4 bg-gray-100 rounded-lg p-6 text-gray-800 flex flex-col space-y-4">
+                                    <h3>
+                                        {(() => {
+                                            switch (evidenceConfirmationType) {
+                                                case 'Evidence': return "Enter the evidence message you want to submit";
+                                                case 'RegistrationRequested': return "Provide a reason for challenging this entry";
+                                                case 'Registered': return "Provide a reason for removing this entry";
+                                                case 'ClearingRequested': return "Provide a reason for challenging this removal request";
+                                                default: return "Default message";
+                                            }
+                                        })()}
+                                    </h3>
+                                    <h5>Message title</h5>
+                                    <textarea
+                                        className="w-full p-2 border rounded"
+                                        rows={1}
+                                        value={evidenceTitle}
+                                        onChange={e => setEvidenceTitle(e.target.value)}
+                                    ></textarea>
+                                    <h5>Evidence message</h5>
+                                    <textarea
+                                        className="w-full p-2 border rounded"
+                                        rows={3}
+                                        value={evidenceText}
+                                        onChange={e => setEvidenceText(e.target.value)}
+                                    ></textarea>
+                                    <div className="flex justify-end space-x-4">
+                                        <button
+                                            onClick={() => setIsConfirmationOpen(false)}
+                                            className="px-4 py-2 border rounded">
+                                            Cancel
+                                        </button>
+                                        <button
+                                            onClick={async () => {
+                                                let result = false; // a flag to check if the function execution was successful
+                                                result = await performEvidenceBasedRequest(curateContractAddress, depositParams, itemId, evidenceTitle, evidenceText, evidenceConfirmationType)
+
+
+                                                // Check if the function was executed successfully
+                                                if (result) {
+
+                                                    setIsDetailsModalOpen(false);
+                                                }
+                                            }}
+                                            className="px-4 py-2 bg-blue-500 text-white rounded">
+                                            Confirm
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
+
+                            {/* Status-based Button */}
+                            <button
+                                onClick={() => { setIsConfirmationOpen(true); setEvidenceConfirmationType(entryStatus); }} // Adjust this if you want a different confirmation for different actions
+                                className={`absolute top-2 right-16 z-10 rounded-full px-4 py-2 shadow-sm transition-colors
+                ${entryStatus === "Registered" ? "bg-orange-500 text-white" :
+                                        entryStatus === "RegistrationRequested" ? "bg-red-500 text-white" :
+                                            "bg-red-500 text-white"}`}
+                            >
+                                {entryStatus === "Registered" && "Remove entry"}
+                                {entryStatus === "RegistrationRequested" && "Challenge registration"}
+                                {entryStatus === "ClearingRequested" && "Challenge removal"}
+                            </button>
+
+                            {/* DETAILS */}
+                            <div className="p-8 overflow-y-auto flex-grow "> {/* Added margin-top to account for the confirmation box */}
+                                <h2 className="text-xl font-semibold mb-4">Entry details</h2>
+                                <div className="p-4 mb-4 border-b-2 border-gray-200">
+                                    <span className={`px-2 py-1 text-white rounded ${statusColorMap[entryStatus]}`}>
+                                        {entryStatus}
+                                    </span>
+                                    {detailsData && Object.entries(detailsData).map(([key, value], idx) => (
+                                        <div key={idx}>
+                                            <strong>{key}:</strong> {value as React.ReactNode}
+                                        </div>
+                                    ))}
+
+                                </div>
+
+
+                                {/* EVIDENCES */}
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-xl mb-4">Evidences</h2>
+                                        <button
+                                            onClick={() => { setIsConfirmationOpen(true); setEvidenceConfirmationType("Evidence"); }} // Trigger the confirmation for submitting evidence
+                                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                            Submit Evidence
+                                        </button>
+                                    </div>
+                                    {evidences.length > 0 ? (
+                                        evidences.map((evidence, idx) => (
+                                            <div key={idx} className="p-3 bg-gray-100 rounded font-serif shadow-lg">
+                                                <div className="mb-2"><strong>Title:</strong> {evidence.title}</div>
+                                                <div className="mb-2"><strong>Description:</strong> {evidence.description}</div>
+                                                <div className="mb-2"><strong>Time:</strong> {evidence.time}</div>
+                                                <div><strong>Party:</strong> {evidence.party}</div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-light-gray italic">No evidence submitted yet...</div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )
+                )
             }
 
 
