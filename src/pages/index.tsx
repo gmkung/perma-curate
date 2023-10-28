@@ -13,6 +13,7 @@ import { formatEther, parseEther } from '@ethersproject/units';
 
 import '../../styles/globals.css';
 import klerosCurateABI from '@/utils/abi/kleros-curate-abi.json';
+import AddressDisplayComponent from '@/components/address-display-component';
 import arbitratorABI from '@/utils/abi/kleros-liquid-abi.json';
 import tagsItemTemplate from '@/assets/tags-item-template.json';
 import CDNItemTemplate from '@/assets/cdn-item-template.json';
@@ -22,9 +23,7 @@ import { fetchCDN } from '@/utils/getCDNFromSubgraph';
 import { fetchEvidence } from '@/utils/getEvidence';
 import { fetchTokens } from '@/utils/getTokensFromSubgraph';
 
-import { references } from '@/utils/chains';  // Adjust the path according to your folder structure
-
-import { chainColorMap, statusColorMap } from '@/utils/colorMappings'
+import { statusColorMap } from '@/utils/colorMappings'
 
 type DepositParamsType = {
     submissionBaseDeposit: number;
@@ -209,7 +208,16 @@ const Home = ({ }: { items: any }) => {
     const [curateContractAddress, setCurateContractAddress] = useState("");
     const [depositParams, setDepositParams] = useState<DepositParamsType>(null);
 
-
+    const renderValue = (key: any, value: any) => {
+        if (typeof value === "string") {
+            if (value.startsWith("/ipfs/")) {
+                return <img style={{ width: '30%' }} src={`https://ipfs.kleros.io${value}`} alt={key} />;
+            } else if (["Address", "Contract Address", "Contract address"].includes(key)) {
+                return <AddressDisplayComponent address={value} />;
+            }
+        }
+        return value;  // default case
+    };
     useEffect(() => {
         switch (activeList) {
             case "Tags":
@@ -237,7 +245,6 @@ const Home = ({ }: { items: any }) => {
         CONTRACT.arbitratorExtraData()
             .then(result => {
                 const arbitratorExtraData = result;
-
                 return Promise.all([
                     CONTRACT.submissionBaseDeposit(),
                     CONTRACT.submissionChallengeBaseDeposit(),
@@ -255,6 +262,7 @@ const Home = ({ }: { items: any }) => {
                         removalChallengeBaseDeposit: parseFloat(formatEther(results[3])),
                         arbitrationCost: parseFloat(formatEther(results[4]))
                     });
+                    console.log("DONE")
                 }
             })
             .catch(error => {
@@ -267,9 +275,13 @@ const Home = ({ }: { items: any }) => {
     }, [curateContractAddress]);
 
     useEffect(() => {
+
+
         const fetchItems = async () => {
             try {
                 let fetchedItems;
+                setItems([]);
+                setLoading(true);
                 switch (activeList) {
                     case "Tags":
                         fetchedItems = await fetchTags(); // Assuming fetchTags fetches for Tags
@@ -498,7 +510,6 @@ const Home = ({ }: { items: any }) => {
                     className="flex-grow p-2 focus:outline-none border-purple-500 border-l-0 text-gray-800 rounded-r-lg"
                 />
             </div>
-
             <p className="text-center text-xl mb-6">
 
                 Total entries: {loading ? (<i style={{ fontSize: '0.8em', color: 'grey' }}>calculating...</i>) : (<> {filteredData.length} </>)}
@@ -513,85 +524,64 @@ const Home = ({ }: { items: any }) => {
                     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '2rem' }}>
                         <img src="https://assets.materialup.com/uploads/92425af1-601b-486e-ad06-1de737628ca0/preview.gif" alt="Loading..." style={{ height: '8rem' }} />
                     </div>
-                ) : (null)
-            }
-            {
-                !loading ? (
-                    <div className="w-4/5 mx-auto grid grid-cols-2 gap-6">
-                        {displayedData.map((item: any, index: number) => {
-                            const parts = item.key0.split(':');
-                            const keyForReference = `${parts[0]}:${parts[1]}`;
-                            const reference = references.find(ref => `${ref.namespaceId}:${ref.id}` === keyForReference);
+                ) : (<div className="w-4/5 mx-auto grid grid-cols-2 gap-6">
+                    {displayedData.map((item: any, index: number) => {
 
-                            return (
-                                <div
-                                    key={index}
-                                    className="bg-purple-600 p-4 rounded-lg break-words transform transition-all duration-150 hover:shadow-2xl active:scale-95"
-                                    onClick={() => handleEntryClick(item)}
-                                >
+                        return (
+                            <div
+                                key={index}
+                                className="bg-purple-600 p-4 rounded-lg break-words transform transition-all duration-150 hover:shadow-2xl active:scale-95"
+                                onClick={() => handleEntryClick(item)}
+                            >
 
-                                    <div className="mt-1">
-                                        <strong>Chain:</strong> <span className={`px-1 py-0 text-white rounded ${chainColorMap[keyForReference] || 'bg-gray-400'}`}>
-                                            {reference?.label}
-                                        </span>
+                                <div><strong>Address:</strong> <AddressDisplayComponent address={item.key0} /></div>
+                                {activeList === "Tags" && (
+                                    <div>
+
+                                        <div><strong>Project:</strong> {item.key2}</div>
+                                        <div><strong>Tag/label:</strong> {item.key1}</div>
+                                        <div><strong>URL:</strong> {item.key3}</div>
                                     </div>
-                                    {activeList === "Tags" && (
-                                        <div>
-                                            <div className="items-center space-x-2">
-                                                <span>{parts[2]}</span>
+                                )}
+                                {activeList === "Tokens" && (
+                                    <div>
+                                        {item.props && item.props.find((prop: { label: string, value: string }) => prop.label === "Logo") && (
+                                            <div>
+                                                <img
+                                                    src={`https://ipfs.kleros.io/${item.props.find((prop: { label: string, value: string }) => prop.label === "Logo").value}`}
+                                                    alt="Logo"
+                                                    style={{ width: '100px', height: '100px' }}  // Adjust size as needed
+                                                />
                                             </div>
-                                            <div><strong>Project:</strong> {item.key2}</div>
-                                            <div><strong>Tag/label:</strong> {item.key1}</div>
-                                            <div><strong>URL:</strong> {item.key3}</div>
-                                        </div>
-                                    )}
-                                    {activeList === "Tokens" && (
-                                        <div>
-                                            <div className="items-center space-x-2">
-                                                <span>{parts[2]}</span>
-                                            </div>
-                                            {item.props && item.props.find((prop: { label: string, value: string }) => prop.label === "Logo") && (
-                                                <div>
-                                                    <img
-                                                        src={`https://ipfs.kleros.io/${item.props.find((prop: { label: string, value: string }) => prop.label === "Logo").value}`}
-                                                        alt="Logo"
-                                                        style={{ width: '100px', height: '100px' }}  // Adjust size as needed
-                                                    />
-                                                </div>
-                                            )}
-                                            <div><strong>Ticker:</strong> {item.key2}</div>
-                                            <div><strong>Name:</strong> {item.key1}</div>
-                                        </div>
-                                    )}
-                                    {activeList === "CDN" && (
-                                        <div>
-                                            <div className="items-center space-x-2">
-                                                <span>{parts[2]}</span>
-                                            </div>
-                                            <div><strong>(Sub)domain:</strong> {item.key1}</div>
-                                            {item.props && item.props.find((prop: { label: string, value: string }) => prop.label === "Visual proof") && (
-                                                <div>
-                                                    <img
-                                                        src={`https://ipfs.kleros.io/${item.props.find((prop: { label: string, value: string }) => prop.label === "Visual proof").value}`}
-                                                        alt="Visual Proof"
-                                                        style={{ width: '100%' }}  // Adjust size as needed
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                    <div className="mt-2">
-                                        <span className={`px-2 py-1 text-white rounded ${statusColorMap[item.status] || 'bg-gray-400'}`}>
-                                            {item.status}
-                                        </span>
+                                        )}
+                                        <div><strong>Ticker:</strong> {item.key2}</div>
+                                        <div><strong>Name:</strong> {item.key1}</div>
                                     </div>
+                                )}
+                                {activeList === "CDN" && (
+                                    <div>
+                                        <div><strong>(Sub)domain:</strong> {item.key1}</div>
+                                        {item.props && item.props.find((prop: { label: string, value: string }) => prop.label === "Visual proof") && (
+                                            <div>
+                                                <img
+                                                    src={`https://ipfs.kleros.io/${item.props.find((prop: { label: string, value: string }) => prop.label === "Visual proof").value}`}
+                                                    alt="Visual Proof"
+                                                    style={{ width: '100%' }}  // Adjust size as needed
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                <div className="mt-2">
+                                    <span className={`px-2 py-1 text-white rounded ${statusColorMap[item.status] || 'bg-gray-400'}`}>
+                                        {item.status}
+                                    </span>
                                 </div>
-                            );
-                        })}
-                    </div>
-                ) : (null)
+                            </div>
+                        );
+                    })}
+                </div>)
             }
-
 
             <div className="w-4/5 mx-auto mt-12 flex justify-between">
                 <button
@@ -802,7 +792,7 @@ const Home = ({ }: { items: any }) => {
                                     </span>
                                     {detailsData && Object.entries(detailsData).map(([key, value], idx) => (
                                         <div key={idx}>
-                                            <strong>{key}:</strong> {value as React.ReactNode}
+                                            <strong>{key}:</strong> {renderValue(key, value)}
                                         </div>
                                     ))}
 
