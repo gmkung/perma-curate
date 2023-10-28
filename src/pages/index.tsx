@@ -491,11 +491,12 @@ const Home = ({ }: { items: any }) => {
                     </button>
                     {registryDropdownOpen && (
                         <div className="absolute z-10 mt-2 bg-white border border-gray-300 rounded shadow-xl">
-                            <button onClick={() => { setActiveList("Tags"); setRegistryDropdownOpen(false) }} className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Tags</button>
-                            <button onClick={() => { setActiveList("CDN"); setRegistryDropdownOpen(false) }} className="block px-4 py-2 text-gray-800 hover:bg-gray-100">CDN</button>
-                            <button onClick={() => { setActiveList("Tokens"); setRegistryDropdownOpen(false) }} className="block px-4 py-2 text-gray-800 hover:bg-gray-100">Tokens</button>
+                            <button onClick={() => { setActiveList("Tags"); setRegistryDropdownOpen(false) }} className="block px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-100">Tags</button>
+                            <button onClick={() => { setActiveList("CDN"); setRegistryDropdownOpen(false) }} className="block px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-100">CDN</button>
+                            <button onClick={() => { setActiveList("Tokens"); setRegistryDropdownOpen(false) }} className="block px-4 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-100">Tokens</button>
                         </div>
                     )}
+
                 </span>
             </h1>
             <p className="text-xl text-center text-purple-300 mb-12">Crowdsourced contract metadata for the Ethereum ecosystem.</p>
