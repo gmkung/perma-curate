@@ -25,6 +25,8 @@ import { fetchTokens } from '@/utils/getTokensFromSubgraph';
 
 import { statusColorMap } from '@/utils/colorMappings'
 
+import ReactMarkdown from 'react-markdown';
+
 type DepositParamsType = {
     submissionBaseDeposit: number;
     submissionChallengeBaseDeposit: number;
@@ -814,7 +816,7 @@ const Home = ({ }: { items: any }) => {
                                         evidences.map((evidence, idx) => (
                                             <div key={idx} className="p-3 bg-gray-100 rounded font-serif shadow-lg">
                                                 <div className="mb-2"><strong>Title:</strong> {evidence.title}</div>
-                                                <div className="mb-2"><strong>Description:</strong> {evidence.description}</div>
+                                                <div className="mb-2"><strong>Description:</strong><ReactMarkdown>{evidence.description}</ReactMarkdown></div>
                                                 <div className="mb-2"><strong>Time:</strong> {evidence.time}</div>
                                                 <div><strong>Party:</strong> {evidence.party}</div>
                                             </div>
