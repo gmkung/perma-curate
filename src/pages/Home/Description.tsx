@@ -1,12 +1,21 @@
 import React from 'react'
+import styled from 'styled-components'
+
+const StyledP = styled.p`
+  font-size: 20px;
+  text-align: center;
+  color: #9f7aea;
+  margin-bottom: 48px;
+`
 
 interface IDescription {}
 
 const Description: React.FC<IDescription> = ({}) => {
   return (
-    <p className="text-xl text-center text-purple-300 mb-12">
+    <StyledP>
       Crowdsourced contract metadata for the Ethereum ecosystem.
-    </p>
+    </StyledP>
   )
 }
+
 export default Description

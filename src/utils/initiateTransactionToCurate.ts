@@ -1,6 +1,6 @@
 import { DepositParamsType } from './performEvidenceBasedRequest'
 import { Contract, ethers } from 'ethers'
-import klerosCurateABI from 'utils/abi/kleros-curate-abi.json'
+import klerosCurateABI from './abi/kleros-curate-abi.json'
 
 export async function initiateTransactionToCurate(
   curateContractAddress: string,

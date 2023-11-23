@@ -1,6 +1,6 @@
-import { postJsonToKlerosIpfs } from 'utils/postJsonToKlerosIpfs'
+import { postJsonToKlerosIpfs } from './postJsonToKlerosIpfs'
 import { Contract, ethers } from 'ethers'
-import klerosCurateABI from 'utils/abi/kleros-curate-abi.json'
+import klerosCurateABI from './abi/kleros-curate-abi.json'
 
 export type DepositParamsType = {
   submissionBaseDeposit: number

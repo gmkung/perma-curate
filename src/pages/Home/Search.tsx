@@ -1,4 +1,30 @@
 import React, { Dispatch, SetStateAction } from 'react'
+import styled from 'styled-components'
+
+const SearchContainer = styled.div`
+  width: 80%;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  padding-bottom: 8px;
+`
+
+const Label = styled.label`
+  background-color: #805ad5;
+  padding: 8px;
+  border-radius: 12px 0 0 12px;
+  color: white;
+`
+
+const Input = styled.input`
+  flex-grow: 1;
+  padding: 8px;
+  outline: none;
+  border: 2px solid #805ad5;
+  border-left: 0;
+  color: #2d3748;
+  border-radius: 0 12px 12px 0;
+`
 
 interface ISearch {
   searchTerm: string
@@ -7,18 +33,16 @@ interface ISearch {
 
 const Search: React.FC<ISearch> = ({ searchTerm, setSearchTerm }) => {
   return (
-    <div className="w-4/5 mx-auto flex items-center pb-2">
-      <label className="bg-purple-600 p-2 rounded-l-lg text-white">
-        Search
-      </label>
-      <input
+    <SearchContainer>
+      <Label>Search</Label>
+      <Input
         type="text"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder="Enter keywords, Ethereum addresses..."
-        className="flex-grow p-2 focus:outline-none border-purple-500 border-l-0 text-gray-800 rounded-r-lg"
       />
-    </div>
+    </SearchContainer>
   )
 }
+
 export default Search

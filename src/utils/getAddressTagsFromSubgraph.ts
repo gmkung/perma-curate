@@ -1,6 +1,6 @@
 // fetchData.ts
 
-import client from 'utils/apollo'
+import client from './apollo'
 import { gql } from '@apollo/client'
 
 export async function fetchTags() {

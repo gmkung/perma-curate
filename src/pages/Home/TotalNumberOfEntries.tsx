@@ -1,4 +1,26 @@
 import React, { Dispatch, SetStateAction } from 'react'
+import styled from 'styled-components'
+
+const Paragraph = styled.p`
+  text-align: center;
+  font-size: 20px;
+  margin-bottom: 24px;
+`
+
+const InfoText = styled.i`
+  font-size: 16px;
+  color: grey;
+`
+
+const Button = styled.button`
+  background-color: #805ad5;
+  padding: 8px 16px;
+  border-radius: 12px;
+  margin-left: 16px;
+  &:hover {
+    background-color: #6b46c1;
+  }
+`
 
 interface ITotalNumberOfEntries {
   loading: boolean
@@ -12,20 +34,16 @@ const TotalNumberOfEntries: React.FC<ITotalNumberOfEntries> = ({
   setIsModalOpen,
 }) => {
   return (
-    <p className="text-center text-xl mb-6">
+    <Paragraph>
       Total entries:{' '}
       {loading ? (
-        <i style={{ fontSize: '0.8em', color: 'grey' }}>calculating...</i>
+        <InfoText>calculating...</InfoText>
       ) : (
         <> {filteredData.length} </>
       )}
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="ml-4 bg-purple-600 px-4 py-2 rounded-lg hover:bg-purple-500"
-      >
-        Add Entry
-      </button>
-    </p>
+      <Button onClick={() => setIsModalOpen(true)}>Add Entry</Button>
+    </Paragraph>
   )
 }
+
 export default TotalNumberOfEntries
