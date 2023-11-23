@@ -1,13 +1,13 @@
 // fetchData.ts
 
-import client from "@/utils/apollo";
-import { gql } from "@apollo/client";
+import client from './apollo'
+import { gql } from '@apollo/client'
 
 export async function fetchEvidence(evidenceGroup: string) {
-  const BATCH_SIZE = 1000;
-  let allItems = [] as any[];
-  let skip = 0;
-  let hasMore = true;
+  const BATCH_SIZE = 1000
+  let allItems = [] as any[]
+  let skip = 0
+  let hasMore = true
 
   while (hasMore) {
     const QUERY = gql`
@@ -20,17 +20,17 @@ export async function fetchEvidence(evidenceGroup: string) {
             party
            }
         }
-        `;
+        `
 
-    const { data } = await client.query({ query: QUERY });
+    const { data } = await client.query({ query: QUERY })
 
     if (!data || !data.evidences || data.evidences.length === 0) {
-      hasMore = false;
+      hasMore = false
     } else {
-      allItems = [...allItems, ...data.evidences];
-      skip += BATCH_SIZE;
+      allItems = [...allItems, ...data.evidences]
+      skip += BATCH_SIZE
     }
   }
 
-  return allItems;
+  return allItems
 }
