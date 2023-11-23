@@ -7,11 +7,6 @@ const App: React.FC = () => {
     <StyledComponentsProvider>
       <Routes>
         <Route index element={<Home items={undefined} />} />
-
-        <Route
-          path="*"
-          element={<h1>Justice not found here ¯\_( ͡° ͜ʖ ͡°)_/¯</h1>}
-        />
       </Routes>
     </StyledComponentsProvider>
   )

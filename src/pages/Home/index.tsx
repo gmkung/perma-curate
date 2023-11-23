@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react'
-import {
-  Contract,
-  ethers,
-  JsonRpcProvider,
-  formatEther,
-  parseEther,
-} from 'ethers'
-
+import styled from 'styled-components'
+import { Contract, JsonRpcProvider, formatEther } from 'ethers'
 import arbitratorABI from '../../utils/abi/kleros-liquid-abi.json'
 import tagsItemTemplate from '../../assets/tags-item-template.json'
 import CDNItemTemplate from '../../assets/cdn-item-template.json'
@@ -28,6 +22,14 @@ import AddEntryModal from './AddEntryModal'
 import DetailsModal from './DetailsModal'
 import Description from './Description'
 import TotalNumberOfEntries from './TotalNumberOfEntries'
+
+const Container = styled.div`
+  background: linear-gradient(to bottom right, #6b46c1, #553c9a);
+  min-height: 100vh;
+  width: 100vw;
+  color: white;
+  padding: 32px;
+`
 
 declare global {
   interface Window {
@@ -321,7 +323,7 @@ const Home = ({}: { items: any }) => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-purple-900 to-purple-800 min-h-screen text-white font-orbitron p-8">
+    <Container>
       <Header
         activeList={activeList}
         setRegistryDropdownOpen={setRegistryDropdownOpen}
@@ -371,7 +373,7 @@ const Home = ({}: { items: any }) => {
           evidences={evidences}
         />
       )}
-    </div>
+    </Container>
   )
 }
 

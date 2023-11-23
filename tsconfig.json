@@ -28,6 +28,7 @@
     "allowSyntheticDefaultImports": true,
     "removeComments": true,
     "isolatedModules": true,
+    "module": "esnext",
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "experimentalDecorators": true
