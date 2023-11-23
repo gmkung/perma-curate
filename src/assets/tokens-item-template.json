@@ -1,0 +1,40 @@
+{
+    "columns": [
+        {
+            "label": "Address",
+            "description": "The address of the smart contract being tagged. Will be store in CAIP-10 format if the chain is properly selected in the UI.",
+            "type": "rich address",
+            "isIdentifier": true
+        },
+        {
+            "label": "Name",
+            "description": "The name of the token",
+            "type": "text",
+            "isIdentifier": true
+        },
+        {
+            "label": "Symbol",
+            "description": "The symbol/ticker of the token",
+            "type": "text",
+            "isIdentifier": true
+        },
+        {
+            "label": "Decimals",
+            "description": "The number of decimals applicable for this token",
+            "type": "number"
+        },
+        {
+            "label": "Logo",
+            "description": "The PNG logo of the token (at least 128px X 128px in size",
+            "type": "image",
+            "isIdentifier": false
+        }
+    ],
+    "values": {
+        "Address": "eip155:1:0xc7283b66Eb1EB5FB86327f08e1B5816b0720212B",
+        "Name": "Tribe",
+        "Symbol": "TRIBE",
+        "Decimals": "18",
+        "Logo": "/ipfs/QmZxLpjnsg1cpF29WBhkwUcWyRNcAxFrpGEDZav6jYb4qN/tribe-tribe-logo.png"
+    }
+}
