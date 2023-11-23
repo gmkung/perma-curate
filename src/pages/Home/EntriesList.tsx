@@ -39,7 +39,7 @@ const StatusSpan = styled.span<{ status: string }>`
 const Image = styled.img<{ isFullWidth: boolean }>`
   width: 100px;
   height: 100px;
-  ${({ isFullWidth }) => isFullWidth && 'width: 100%;'}
+  ${({ isFullWidth }) => isFullWidth && 'width: 100%; height: 100%;'}
 `
 
 const handleEntryClick = async (

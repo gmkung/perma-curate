@@ -109,6 +109,65 @@ const StatusSpan = styled.span<{ status: string }>`
   border-radius: 4px;
   background-color: ${({ status }) => statusColorMap[status]};
 `
+const EntryDetailsHeader = styled.h2`
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+`
+
+const EntryDetailsContainer = styled.div`
+  padding: 16px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #edf2f7;
+`
+const EvidenceSectionHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`
+
+const EvidenceHeader = styled.h2`
+  font-size: 1.25rem; // 20px
+  margin-bottom: 16px;
+`
+
+const SubmitEvidenceButton = styled.button`
+  background-color: #3182ce;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  &:hover {
+    background-color: #2b6cb0;
+  }
+`
+
+const Evidence = styled.div`
+  padding: 12px;
+  background-color: #f7fafc;
+  border-radius: 4px;
+  font-family: serif;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+`
+
+const EvidenceTitle = styled.div`
+  margin-bottom: 8px;
+`
+
+const EvidenceDescription = styled.div`
+  margin-bottom: 8px;
+`
+
+const EvidenceTime = styled.div`
+  margin-bottom: 8px;
+`
+
+const EvidenceParty = styled.div``
+
+const NoEvidenceText = styled.div`
+  color: #a0aec0;
+  font-style: italic;
+`
 
 interface IDetailsModal {
   setIsDetailsModalOpen: Dispatch<SetStateAction<boolean>>
@@ -224,8 +283,8 @@ const DetailsModal: React.FC<IDetailsModal> = ({
 
         {/* DETAILS */}
         <DetailsContent>
-          <h2 className="text-xl font-semibold mb-4">Entry details</h2>
-          <div className="p-4 mb-4 border-b-2 border-gray-200">
+          <EntryDetailsHeader>Entry details</EntryDetailsHeader>
+          <EntryDetailsContainer>
             <StatusSpan status={entryStatus}>{entryStatus}</StatusSpan>
             {detailsData &&
               Object.entries(detailsData).map(([key, value], idx) => (
@@ -233,46 +292,41 @@ const DetailsModal: React.FC<IDetailsModal> = ({
                   <strong>{key}:</strong> {renderValue(key, value)}
                 </div>
               ))}
-          </div>
+          </EntryDetailsContainer>
           {/* EVIDENCES */}
           <EvidenceSection>
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl mb-4">Evidences</h2>
-              <button
+            <EvidenceSectionHeader>
+              <EvidenceHeader>Evidences</EvidenceHeader>
+              <SubmitEvidenceButton
                 onClick={() => {
                   setIsConfirmationOpen(true)
                   setEvidenceConfirmationType('Evidence')
-                }} // Trigger the confirmation for submitting evidence
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                }}
               >
                 Submit Evidence
-              </button>
-            </div>
+              </SubmitEvidenceButton>
+            </EvidenceSectionHeader>
+
             {evidences.length > 0 ? (
               evidences.map((evidence, idx) => (
-                <div
-                  key={idx}
-                  className="p-3 bg-gray-100 rounded font-serif shadow-lg"
-                >
-                  <div className="mb-2">
+                <Evidence key={idx}>
+                  <EvidenceTitle>
                     <strong>Title:</strong> {evidence.title}
-                  </div>
-                  <div className="mb-2">
+                  </EvidenceTitle>
+                  <EvidenceDescription>
                     <strong>Description:</strong>
                     <ReactMarkdown>{evidence.description}</ReactMarkdown>
-                  </div>
-                  <div className="mb-2">
+                  </EvidenceDescription>
+                  <EvidenceTime>
                     <strong>Time:</strong> {evidence.time}
-                  </div>
-                  <div>
+                  </EvidenceTime>
+                  <EvidenceParty>
                     <strong>Party:</strong> {evidence.party}
-                  </div>
-                </div>
+                  </EvidenceParty>
+                </Evidence>
               ))
             ) : (
-              <div className="text-light-gray italic">
-                No evidence submitted yet...
-              </div>
+              <NoEvidenceText>No evidence submitted yet...</NoEvidenceText>
             )}
           </EvidenceSection>
         </DetailsContent>
