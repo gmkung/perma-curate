@@ -8,11 +8,7 @@ yarn && yarn start
 
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## Building
-
-Build command: yarn install && yarn run build && yarn next export
+Open [http://localhost:1234](http://localhost:1234) with your browser to see the result.
 
 ## Deploy on IPFS
 
