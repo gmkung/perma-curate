@@ -1,4 +1,5 @@
-import AddressDisplay from '../components/AddressDisplay'
+import React from 'react'
+import AddressDisplay from 'components/AddressDisplay'
 
 export const renderValue = (key: any, value: any) => {
   if (typeof value === 'string') {

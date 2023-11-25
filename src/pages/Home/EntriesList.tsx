@@ -1,9 +1,9 @@
 import React, { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
-import AddressDisplay from '../../components/AddressDisplay'
-import { statusColorMap } from '../../utils/colorMappings'
-import { fetchFromIPFS } from '../../utils/fetchFromIPFS'
-import { fetchEvidence } from '../../utils/getEvidence'
+import AddressDisplay from 'components/AddressDisplay'
+import { statusColorMap } from 'utils/colorMappings'
+import { fetchFromIPFS } from 'utils/fetchFromIPFS'
+import { fetchEvidence } from 'utils/getEvidence'
 
 const EntriesContainer = styled.div`
   width: 80%;

@@ -1,9 +1,9 @@
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import styled from 'styled-components'
-import { renderValue } from '../../utils/renderValue'
-import { statusColorMap } from '../../utils/colorMappings'
 import ReactMarkdown from 'react-markdown'
-import { performEvidenceBasedRequest } from '../../utils/performEvidenceBasedRequest'
+import { renderValue } from 'utils/renderValue'
+import { statusColorMap } from 'utils/colorMappings'
+import { performEvidenceBasedRequest } from 'utils/performEvidenceBasedRequest'
 
 const ModalOverlay = styled.div`
   position: fixed;

@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useRef } from 'react'
-import { useFocusOutside } from '../../hooks/useFocusOutside'
+import { useFocusOutside } from 'hooks/useFocusOutside'
 import styled, { css } from 'styled-components'
 
 interface IHeader {
@@ -101,7 +101,7 @@ const Header: React.FC<IHeader> = ({
         src="https://cryptologos.cc/logos/kleros-pnk-logo.svg?v=026"
         alt="Kleros"
       />
-      Kleros
+      Kleros Scout
       <DropdownButton
         open={registryDropdownOpen}
         onClick={() => setRegistryDropdownOpen(!registryDropdownOpen)}

@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
-import { references } from '../utils/chains'
-import { chainColorMap } from '../utils/colorMappings'
+import { references } from 'utils/chains'
+import { chainColorMap } from 'utils/colorMappings'
 
 const Container = styled.div`
   margin-top: 4px;
