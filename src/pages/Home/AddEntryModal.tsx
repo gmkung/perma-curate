@@ -19,7 +19,6 @@ const ModalContainer = styled.div`
   padding: 32px;
   border-radius: 12px;
   width: 50%;
-  height: 80%;
   position: relative;
   overflow-y: auto;
 `
