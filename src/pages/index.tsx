@@ -21,6 +21,7 @@ import tokensItemTemplate from '@/assets/tokens-item-template.json';
 import { fetchTags } from '@/utils/getAddressTagsFromSubgraph';
 import { fetchCDN } from '@/utils/getCDNFromSubgraph';
 import { fetchEvidence } from '@/utils/getEvidence';
+import { fetchMetaEvidence } from '@/utils/getMetaEvidence';
 import { fetchTokens } from '@/utils/getTokensFromSubgraph';
 
 import { statusColorMap } from '@/utils/colorMappings'
@@ -33,7 +34,9 @@ type DepositParamsType = {
     removalBaseDeposit: number;
     removalChallengeBaseDeposit: number;
     arbitrationCost: number;
+    metaEvidenceUpdates: number;
 } | null;
+
 
 const postJSONtoKlerosIPFS = async (object: Record<string, any>) => {
     const json_string = JSON.stringify(object);
@@ -205,6 +208,7 @@ const Home = ({ }: { items: any }) => {
     const [entryStatus, setEntryStatus] = useState('');
     const [itemId, setItemId] = useState('');
     const [isImageUploadSuccessful, setIsImageUploadSuccessful] = useState(false);
+    const [metaEvidenceURI, setMetaEvidenceURI] = useState('');
 
     //Form submit stuff
     const [selectedChain, setSelectedChain] = useState(references[0]); // Default to first chain
@@ -275,7 +279,8 @@ const Home = ({ }: { items: any }) => {
                     CONTRACT.submissionChallengeBaseDeposit(),
                     CONTRACT.removalBaseDeposit(),
                     CONTRACT.removalChallengeBaseDeposit(),
-                    ARBCONTRACT.arbitrationCost(arbitratorExtraData)
+                    ARBCONTRACT.arbitrationCost(arbitratorExtraData),
+                    CONTRACT.metaEvidenceUpdates(),
                 ]);
             })
             .then(results => {
@@ -285,7 +290,8 @@ const Home = ({ }: { items: any }) => {
                         submissionChallengeBaseDeposit: parseFloat(formatEther(results[1])),
                         removalBaseDeposit: parseFloat(formatEther(results[2])),
                         removalChallengeBaseDeposit: parseFloat(formatEther(results[3])),
-                        arbitrationCost: parseFloat(formatEther(results[4]))
+                        arbitrationCost: parseFloat(formatEther(results[4])),
+                        metaEvidenceUpdates: parseInt(formatEther(results[5]))
                     });
                     console.log("DONE")
                 }
@@ -300,8 +306,6 @@ const Home = ({ }: { items: any }) => {
     }, [curateContractAddress]);
 
     useEffect(() => {
-
-
         const fetchItems = async () => {
             try {
                 let fetchedItems;
@@ -319,6 +323,8 @@ const Home = ({ }: { items: any }) => {
                         break;
                 }
                 setItems(fetchedItems as any);
+                
+                console.log(await fetchMetaEvidence(curateContractAddress, depositParams?.metaEvidenceUpdates ?? 1));
             } catch (err: any) {
                 setError(err.message);
             } finally {
@@ -735,7 +741,7 @@ const Home = ({ }: { items: any }) => {
                                     </>
                                 )}
                                 {depositParams ? (<p className="text-gray-600">Submission Base Deposit: {depositParams.submissionBaseDeposit + depositParams.arbitrationCost} xDAi</p>) : (null)}
-
+                                <div>URL: {metaEvidenceURI}</div>
                                 <button
                                     type="submit"
                                     className={`bg-blue-500 text-white p-2 rounded ${(activeList !== 'Tags' && !isImageUploadSuccessful) ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"}`}
