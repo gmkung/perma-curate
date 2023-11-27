@@ -1,20 +1,12 @@
 import React, { Dispatch, SetStateAction, useState } from 'react'
 import styled from 'styled-components'
+import Button from '~src/components/Button'
 
 const Container = styled.div`
   width: 80%;
   margin: 48px auto 0;
   display: flex;
   justify-content: space-between;
-`
-
-const Button = styled.button`
-  background-color: #805ad5;
-  padding: 8px 16px;
-  border-radius: 12px;
-  &:hover {
-    background-color: #6b46c1;
-  }
 `
 
 const PageControls = styled.div`
@@ -33,7 +25,7 @@ const Input = styled.input`
 `
 
 const Span = styled.span`
-  color: #718096;
+  color: white;
 `
 
 interface IPagination {

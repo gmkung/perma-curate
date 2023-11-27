@@ -9,16 +9,6 @@ interface IHeader {
   setActiveList: Dispatch<SetStateAction<string>>
 }
 
-const dropdownStyles = css`
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  border: none;
-  font-size: 16px;
-  padding: 10px 20px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-`
-
 const HeaderContainer = styled.div`
   font-size: 48px;
   text-align: center;
@@ -27,6 +17,17 @@ const HeaderContainer = styled.div`
   justify-content: center;
   align-items: center;
   gap: 16px;
+  font-family: "Orbitron", sans-serif;
+`
+
+const dropdownStyles = css`
+  border-radius: 16px; /* More pronounced rounded corners */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+  border: none;
+  font-size: 16px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 `
 
 const LogoImage = styled.img`
@@ -40,11 +41,13 @@ const DropdownButton = styled.button<{ open: boolean }>`
   justify-content: space-between;
   font-weight: bold;
   position: relative;
-  background-color: ${(props) => (props.open ? '#365f8c' : '#4f46e5')};
+  background: linear-gradient(145deg, #9575cd, #6c43ab); /* Subtle gradient */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   color: white;
 
   &:hover {
-    background-color: #365f8c;
+    background: linear-gradient(145deg, #a188d6, #7e57c2); /* Darker gradient for hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Larger shadow for lifted effect */
   }
 
   &:after {
@@ -80,6 +83,8 @@ const DropdownItem = styled.button`
   background-color: white;
   color: #2d3748;
   transition: background-color 0.3s ease;
+  box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 0),
+    0px 0px 0px 0px rgba(0, 0, 0, 0);
 
   &:hover {
     background-color: #e2e8f0;
@@ -101,7 +106,7 @@ const Header: React.FC<IHeader> = ({
         src="https://cryptologos.cc/logos/kleros-pnk-logo.svg?v=026"
         alt="Kleros"
       />
-      Kleros Scout
+      Kleros
       <DropdownButton
         open={registryDropdownOpen}
         onClick={() => setRegistryDropdownOpen(!registryDropdownOpen)}

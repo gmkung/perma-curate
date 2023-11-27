@@ -1,25 +1,21 @@
 import React, { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
+import Button from '~src/components/Button'
 
-const Paragraph = styled.p`
+const Paragraph = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   text-align: center;
+  justify-content: center;
   font-size: 20px;
   margin-bottom: 24px;
+  gap: 24px;
 `
 
 const InfoText = styled.i`
   font-size: 16px;
-  color: grey;
-`
-
-const Button = styled.button`
-  background-color: #805ad5;
-  padding: 8px 16px;
-  border-radius: 12px;
-  margin-left: 16px;
-  &:hover {
-    background-color: #6b46c1;
-  }
+  color: white;
 `
 
 interface ITotalNumberOfEntries {
@@ -35,12 +31,13 @@ const TotalNumberOfEntries: React.FC<ITotalNumberOfEntries> = ({
 }) => {
   return (
     <Paragraph>
-      Total entries:{' '}
-      {loading ? (
-        <InfoText>calculating...</InfoText>
-      ) : (
-        <> {filteredData.length} </>
-      )}
+      <span>Total entries: {' '}
+        {loading ? (
+          <InfoText>calculating...</InfoText>
+        ) : (
+          filteredData.length
+        )}
+      </span>
       <Button onClick={() => setIsModalOpen(true)}>Add Entry</Button>
     </Paragraph>
   )

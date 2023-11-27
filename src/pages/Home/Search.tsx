@@ -11,7 +11,8 @@ const SearchContainer = styled.div`
 
 const Label = styled.label`
   background-color: #805ad5;
-  padding: 8px;
+  font-weight: bold;
+  padding: 8px 16px;
   border-radius: 12px 0 0 12px;
   color: white;
 `
