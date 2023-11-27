@@ -1,34 +1,31 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { Contract, JsonRpcProvider, formatEther } from 'ethers'
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import 'react-toastify/dist/ReactToastify.css'
 import arbitratorABI from 'utils/abi/kleros-liquid-abi.json'
-import tagsItemTemplate from 'assets/tags-item-template.json'
-import CDNItemTemplate from 'assets/cdn-item-template.json'
-import tokensItemTemplate from 'assets/tokens-item-template.json'
+
 import { fetchTags } from 'utils/getAddressTagsFromSubgraph'
 import { fetchCDN } from 'utils/getCDNFromSubgraph'
 import { fetchTokens } from 'utils/getTokensFromSubgraph'
 import { DepositParamsType } from 'utils/performEvidenceBasedRequest'
 import klerosCurateABI from 'utils/abi/kleros-curate-abi.json'
-import { postJsonToKlerosIpfs } from 'utils/postJsonToKlerosIpfs'
-import { initiateTransactionToCurate } from 'utils/initiateTransactionToCurate'
 import Header from './Header'
 import Search from './Search'
 import EntriesList from './EntriesList'
 import LoadingItems from './LoadingItems'
 import Pagination from './Pagination'
-import Footer from './Footer'
-import AddEntryModal from './AddEntryModal'
+import Footer from 'components/Footer'
 import DetailsModal from './DetailsModal'
-import Description from './Description'
-import TotalNumberOfEntries from './TotalNumberOfEntries'
+import RegistryDetails from './RegistryDetails'
+import SubmitEntries from './SubmitEntries'
 
 const Container = styled.div`
-  background: linear-gradient(to bottom right, #6b46c1, #553c9a);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #5a2393;
   min-height: 100vh;
-  width: 100vw;
+  margin: 0 auto;
   color: white;
   padding: 32px;
 `
@@ -39,12 +36,11 @@ declare global {
   }
 }
 
-const Home = ({ }: { items: any }) => {
+const Home = ({}: { items: any }) => {
   //Initiation
   const [activeList, setActiveList] = useState<'Tags' | 'CDN' | 'Tokens'>(
     'Tags'
   )
-  const [registryDropdownOpen, setRegistryDropdownOpen] = useState(false)
 
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
@@ -53,7 +49,6 @@ const Home = ({ }: { items: any }) => {
   //navigation and search
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
-  const [isModalOpen, setIsModalOpen] = useState(false)
 
   //for the pop-up to display details and evidence
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
@@ -62,7 +57,6 @@ const Home = ({ }: { items: any }) => {
   const [evidences, setEvidences] = useState<any[]>([])
   const [entryStatus, setEntryStatus] = useState('')
   const [itemId, setItemId] = useState('')
-  const [isImageUploadSuccessful, setIsImageUploadSuccessful] = useState(false)
 
   //contract state management
   const [curateContractAddress, setCurateContractAddress] = useState('')
@@ -189,205 +183,17 @@ const Home = ({ }: { items: any }) => {
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage)
 
-  const handleFormSubmit = async (event: any) => {
-    event.preventDefault()
-    // Check if depositParams is null and throw an error if it is
-
-    if (!depositParams) {
-      throw new Error('depositParams is null')
-    }
-
-    const formData = new FormData(event.target)
-    let dataObject = {}
-
-    switch (activeList) {
-      case 'Tags':
-        dataObject = {
-          'Contract Address': formData.get('contractAddress'),
-          'Public Name Tag': formData.get('publicNameTag'),
-          'Project Name': formData.get('projectName'),
-          'UI/Website Link': formData.get('uiLink'),
-          'Public Note': formData.get('publicNote'),
-        }
-        break
-      case 'CDN':
-        dataObject = {
-          'Contract Address': formData.get('contractAddress'),
-          'Domain name': formData.get('domainName'),
-          'Visual proof': document
-            .getElementById('visualProof')
-            ?.getAttribute('data-uri'),
-        }
-        break
-      case 'Tokens':
-        dataObject = {
-          Address: formData.get('contractAddress'),
-          Name: formData.get('name'),
-          Symbol: formData.get('symbol'),
-          Decimals: formData.get('decimals'),
-          Logo: document.getElementById('logoImage')?.getAttribute('data-uri'),
-        }
-        break
-
-      default:
-        console.error('Invalid active list type:', activeList)
-    }
-
-    const formattedData = {
-      ...(activeList === 'Tags'
-        ? tagsItemTemplate
-        : activeList === 'CDN'
-          ? CDNItemTemplate
-          : activeList === 'Tokens'
-            ? tokensItemTemplate
-            : {}),
-      values: dataObject,
-    }
-    console.log(formattedData)
-
-    // Step 3: Store the JSON object in IPFS using Kleros's node
-    const ipfsPath = await postJsonToKlerosIpfs(formattedData)
-    console.log(ipfsPath)
-
-    // Step 4: Initiate a transaction to Curate's contract (Placeholder)
-    // You will need a function that interacts with the Ethereum blockchain to submit the data to Curate's contract.
-    const transactionSuccess = await initiateTransactionToCurate(
-      curateContractAddress,
-      depositParams,
-      ipfsPath
-    )
-
-    // Step 5: Close the pop-up
-    if (transactionSuccess) {
-      // Only close the modal if the transaction was successful
-      setIsModalOpen(false)
-    } else {
-      // Optionally, show an error message to the user here
-      console.error('Transaction failed.')
-    }
-  }
-
-  const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setIsImageUploadSuccessful(false)
-
-    let file
-    if (event.target.files && event.target.files.length > 0) {
-      file = event.target.files[0]
-    } else return
-
-    if (!file) return
-
-    // Check if the file is a PNG
-    if (file.type !== 'image/png') {
-      toast.error('Please upload a PNG file.');
-      return;
-    }
-
-    const img = new Image();
-    img.onload = async () => {
-      // Check dimensions
-      const minWidth = 100; // Set your expected width
-      const minHeight = 100; // Set your expected height
-      console.log(img.width, img.height)
-      if (img.width <= minWidth || img.height <= minHeight) {
-        toast.error(`Image dimensions should be ${minWidth}x${minHeight}.`);
-        return;
-      }
-
-      // Check for transparency
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
-      if (!ctx) {
-        console.error('Failed to get 2D context from canvas');
-        return;
-      }
-
-      canvas.width = img.width;
-      canvas.height = img.height;
-
-      ctx.drawImage(img, 0, 0);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      let isTransparent = false;
-      for (let i = 0; i < imageData.data.length; i += 4) {
-        if (imageData.data[i + 3] < 255) {
-          isTransparent = true;
-          break;
-        }
-      }
-
-      if (!isTransparent) {
-        toast.error('The image must have transparency.');
-        return;
-      }
-
-      // If all checks pass, proceed to upload
-      const reader = new FileReader();
-      reader.readAsArrayBuffer(file);
-
-      reader.onload = async () => {
-        if (reader.result instanceof ArrayBuffer) {
-          const buffer_data = Array.from(new Uint8Array(reader.result));
-
-          const final_dict = {
-            fileName: 'image.png',
-            buffer: { type: 'Buffer', data: buffer_data },
-          };
-
-          try {
-            const response = await fetch('https://ipfs.kleros.io/add', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(final_dict),
-            });
-
-            const responseData = await response.json();
-            console.log('Upload results: ' + responseData);
-            if (responseData && responseData.data[0].hash) {
-              let visualProofElement
-              switch (activeList) {
-                case 'CDN':
-                  visualProofElement = document.getElementById('visualProof')
-                  break
-                case 'Tokens':
-                  visualProofElement = document.getElementById('logoImage')
-              }
-              if (visualProofElement) {
-                visualProofElement.setAttribute(
-                  'data-uri',
-                  '/ipfs/' + responseData.data[0].hash
-                )
-                setIsImageUploadSuccessful(true)
-              }
-            }
-          } catch (error) {
-            console.error('Failed to upload image to IPFS:', error)
-          }
-        }
-      }
-    };
-
-    // Set the src of the image to the uploaded file to trigger onload
-    img.src = URL.createObjectURL(file);
-  }
-
   return (
     <Container>
-      <Header
+      <Header activeList={activeList} setActiveList={setActiveList} />
+      <RegistryDetails loading={loading} filteredData={filteredData} />
+      <SubmitEntries
         activeList={activeList}
-        setRegistryDropdownOpen={setRegistryDropdownOpen}
-        setActiveList={setActiveList}
-        registryDropdownOpen={registryDropdownOpen}
+        depositParams={depositParams}
+        curateContractAddress={curateContractAddress}
       />
-      <Description />
       <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-      <TotalNumberOfEntries
-        loading={loading}
-        filteredData={filteredData}
-        setIsModalOpen={setIsModalOpen}
-      />
+
       {loading ? (
         <LoadingItems />
       ) : (
@@ -403,16 +209,7 @@ const Home = ({ }: { items: any }) => {
       )}
       <Pagination totalPages={totalPages} setCurrentPage={setCurrentPage} />
       <Footer />
-      {isModalOpen && (
-        <AddEntryModal
-          setIsModalOpen={setIsModalOpen}
-          handleFormSubmit={handleFormSubmit}
-          activeList={activeList}
-          handleImageUpload={handleImageUpload}
-          depositParams={depositParams}
-          isImageUploadSuccessful={isImageUploadSuccessful}
-        />
-      )}
+
       {isDetailsModalOpen && (
         <DetailsModal
           setIsDetailsModalOpen={setIsDetailsModalOpen}

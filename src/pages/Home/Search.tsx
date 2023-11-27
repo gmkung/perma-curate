@@ -3,9 +3,7 @@ import styled from 'styled-components'
 
 const SearchContainer = styled.div`
   width: 80%;
-  margin: auto;
   display: flex;
-  align-items: center;
   padding-bottom: 8px;
 `
 

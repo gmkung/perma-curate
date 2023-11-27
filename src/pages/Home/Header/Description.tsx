@@ -1,21 +1,19 @@
 import React from 'react'
 import styled from 'styled-components'
 
-const StyledP = styled.p`
+const StyledText = styled.text`
   font-size: 20px;
-  font-family: "Orbitron", sans-serif;
+  font-family: 'Orbitron', sans-serif;
   text-align: center;
-  color: #9f7aea;
-  margin-bottom: 48px;
+  color: #d6d6d6;
+  margin-bottom: 34px;
 `
 
-interface IDescription {}
-
-const Description: React.FC<IDescription> = ({}) => {
+const Description: React.FC = () => {
   return (
-    <StyledP>
+    <StyledText>
       Crowdsourced contract metadata for the Ethereum ecosystem.
-    </StyledP>
+    </StyledText>
   )
 }
 
