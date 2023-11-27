@@ -2598,6 +2598,8 @@ __metadata:
     eslint-plugin-react-hooks: ^4.0.0
     ethers: ^6.8.0
     graphql: ^16.8.1
+    overlayscrollbars: ^2.3.0
+    overlayscrollbars-react: ^0.5.2
     parcel: 2.8.3
     postcss: ^8.0.0
     process: ^0.11.10
@@ -12083,6 +12085,23 @@ __metadata:
   version: 1.4.1
   resolution: "ordered-binary@npm:1.4.1"
   checksum: 274940b4ef983562e11371c84415c265432a4e1337ab85f8e7669eeab6afee8f655c6c12ecee1cd121aaf399c32f5c781b0d50e460bd42da004eba16dcc66574
+  languageName: node
+  linkType: hard
+
+"overlayscrollbars-react@npm:^0.5.2":
+  version: 0.5.3
+  resolution: "overlayscrollbars-react@npm:0.5.3"
+  peerDependencies:
+    overlayscrollbars: ^2.0.0
+    react: ">=16.8.0"
+  checksum: 56e0150ffe972f9c360d581d4c51e6bd3e7b52098624c1493c1d6d71c1878f2c1e6f92914fe7b769f8a7373dabbdc775ad89e834dd260854d63e5204d0771e7d
+  languageName: node
+  linkType: hard
+
+"overlayscrollbars@npm:^2.3.0":
+  version: 2.4.5
+  resolution: "overlayscrollbars@npm:2.4.5"
+  checksum: e245f07c23555c2b3a81c40f4ab0c946d8785596569e9e3aad5205dce91241e289b6073a0c80da94c79ca4fa2ee5c82c85d802497fda4408c4993baf3218305c
   languageName: node
   linkType: hard
 
