@@ -24,7 +24,7 @@ import { fetchEvidence } from '@/utils/getEvidence';
 import { fetchTokens } from '@/utils/getTokensFromSubgraph';
 
 import { statusColorMap } from '@/utils/colorMappings'
-
+import { references } from '@/utils/chains'
 import ReactMarkdown from 'react-markdown';
 
 type DepositParamsType = {
@@ -206,6 +206,10 @@ const Home = ({ }: { items: any }) => {
     const [itemId, setItemId] = useState('');
     const [isImageUploadSuccessful, setIsImageUploadSuccessful] = useState(false);
 
+    //Form submit stuff
+    const [selectedChain, setSelectedChain] = useState(references[0]); // Default to first chain
+    const [address, setAddress] = useState('');
+
     //contract state management
     const [curateContractAddress, setCurateContractAddress] = useState("");
     const [depositParams, setDepositParams] = useState<DepositParamsType>(null);
@@ -220,6 +224,25 @@ const Home = ({ }: { items: any }) => {
         }
         return value;  // default case
     };
+
+    const handleChainChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedChainId = event.target.value;
+        const chain = references.find(chain => chain.id === selectedChainId);
+
+        if (chain) {
+            setSelectedChain(chain);
+        } else {
+            // Handle the error case, e.g., set a default value or show an error message
+            console.error('Selected chain not found');
+            setSelectedChain(references[0]); // Default to the first chain in the array as a fallback
+        }
+    };
+
+    const handleAddressChange = (event: any) => {
+        setAddress(event.target.value);
+    };
+
+
     useEffect(() => {
         switch (activeList) {
             case "Tags":
@@ -360,6 +383,8 @@ const Home = ({ }: { items: any }) => {
     const handleFormSubmit = async (event: any) => {
         event.preventDefault();
         // Check if depositParams is null and throw an error if it is
+        const finalAddress = `${selectedChain.namespaceId}:${selectedChain.id}:${address}`;
+        console.log('Final Address: ', finalAddress);
 
         if (!depositParams) {
             throw new Error('depositParams is null');
@@ -371,7 +396,7 @@ const Home = ({ }: { items: any }) => {
         switch (activeList) {
             case 'Tags':
                 dataObject = {
-                    "Contract Address": formData.get("contractAddress"),
+                    "Contract Address": finalAddress,
                     "Public Name Tag": formData.get("publicNameTag"),
                     "Project Name": formData.get("projectName"),
                     "UI/Website Link": formData.get("uiLink"),
@@ -380,14 +405,14 @@ const Home = ({ }: { items: any }) => {
                 break;
             case 'CDN':
                 dataObject = {
-                    "Contract Address": formData.get("contractAddress"),
+                    "Contract Address": finalAddress,
                     "Domain name": formData.get("domainName"),
                     "Visual proof": document.getElementById("visualProof")?.getAttribute("data-uri"),
                 };
                 break;
             case 'Tokens':
                 dataObject = {
-                    "Address": formData.get("contractAddress"),
+                    "Address": finalAddress,
                     "Name": formData.get("name"),
                     "Symbol": formData.get("symbol"),
                     "Decimals": formData.get("decimals"),
@@ -627,10 +652,22 @@ const Home = ({ }: { items: any }) => {
                             <button onClick={() => setIsModalOpen(false)} className="absolute top-2 right-2 text-gray-800">X</button>
                             <form onSubmit={handleFormSubmit}>
                                 {/* Contract Address */}
-                                <div className="mb-1">
-                                    <label htmlFor="contractAddress" className="block text-sm font-bold mb-2 text-gray-800">Contract Address:</label>
-                                    <input type="text" id="contractAddress" name="contractAddress" placeholder="Enter contract address" className="w-full p-2 border rounded text-gray-800" required />
+                                <div className="flex items-center mb-1 space-x-4">
+                                    <div>
+                                        <label htmlFor="chainSelect" className="block text-sm font-bold mb-2 text-gray-800">Chain:</label>
+                                        <select id="chainSelect" className="p-2 border rounded text-gray-800" onChange={handleChainChange} value={selectedChain.id}>
+                                            {references.map(chain => (
+                                                <option key={chain.id} value={chain.id}>{chain.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div className="flex-grow">
+                                        <label htmlFor="contractAddress" className="block text-sm font-bold mb-2 text-gray-800">Contract Address:</label>
+                                        <input type="text" id="contractAddress" name="contractAddress" placeholder="Enter contract address" className="w-full p-2 border rounded text-gray-800" onChange={handleAddressChange} required />
+                                    </div>
                                 </div>
+
                                 {activeList === 'Tags' && (
                                     <>
                                         {/* Public Name Tag */}
