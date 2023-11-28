@@ -6,7 +6,6 @@ import SuggestAndSubmit from './SuggestAndSubmit'
 const Container = styled.div`
   display: flex;
   width: 80%;
-  margin: 0 auto;
   margin-bottom: 24px;
   align-items: center;
   border-radius: 12px;
@@ -16,6 +15,7 @@ const Container = styled.div`
   font-weight: 700;
   justify-content: space-between;
   font-size: 22px;
+  box-sizing: border-box;
 `
 
 interface ISubmitEntries {

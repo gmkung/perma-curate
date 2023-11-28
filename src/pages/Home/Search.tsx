@@ -1,28 +1,43 @@
 import React, { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 
-const SearchContainer = styled.div`
-  width: 80%;
+const Container = styled.div`
   display: flex;
-  padding-bottom: 8px;
+  width: 80%;
+  margin-bottom: 24px;
+
+  box-sizing: border-box;
 `
 
-const Label = styled.label`
-  background-color: #805ad5;
+const StyledLabel = styled.label`
+  display: flex;
+  background-color: #883ae1;
+  font-family: 'Orbitron', sans-serif;
   font-weight: bold;
-  padding: 8px 16px;
+  font-size: 20px;
+  padding: 16px 32px;
   border-radius: 12px 0 0 12px;
   color: white;
 `
 
-const Input = styled.input`
-  flex-grow: 1;
-  padding: 8px;
+const StyledInput = styled.input`
+  display: block;
+  padding-left: 24px;
   outline: none;
   border: 2px solid #805ad5;
   border-left: 0;
   color: #2d3748;
   border-radius: 0 12px 12px 0;
+  width: 100%;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  ::placeholder {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #c7c7c7;
+  }
 `
 
 interface ISearch {
@@ -32,15 +47,15 @@ interface ISearch {
 
 const Search: React.FC<ISearch> = ({ searchTerm, setSearchTerm }) => {
   return (
-    <SearchContainer>
-      <Label>Search</Label>
-      <Input
+    <Container>
+      <StyledLabel>Search</StyledLabel>
+      <StyledInput
         type="text"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Enter keywords, Ethereum addresses..."
+        placeholder="Enter keywords, Ethereum address, etc..."
       />
-    </SearchContainer>
+    </Container>
   )
 }
 

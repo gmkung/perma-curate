@@ -9,12 +9,12 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 80%;
-  margin: 0 auto;
   margin-bottom: 12px;
   border-radius: 12px;
   background: #380c65;
   padding: 20px 32px;
   cursor: pointer;
+  box-sizing: border-box;
 `
 
 const Header = styled.div`
