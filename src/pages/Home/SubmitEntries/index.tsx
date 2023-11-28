@@ -11,7 +11,7 @@ const Container = styled.div`
   align-items: center;
   border-radius: 12px;
   background: #380c65;
-  padding: 20px 32px 20px 20px;
+  padding: 16px 32px;
   font-family: 'Orbitron', sans-serif;
   font-weight: 700;
   justify-content: space-between;
@@ -33,7 +33,7 @@ const SubmitEntries: React.FC<ISubmitEntries> = ({
     <>
       <Container>
         <EarnRewards />
-        <SuggestAndSubmit />
+        <SuggestAndSubmit activeList={activeList} />
       </Container>
     </>
   )

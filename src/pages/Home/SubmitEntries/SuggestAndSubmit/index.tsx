@@ -9,12 +9,14 @@ const Container = styled.div`
   gap: 28px;
 `
 
-interface ISuggestAndSubmit {}
+interface ISuggestAndSubmit {
+  activeList: string
+}
 
-const SuggestAndSubmit: React.FC<ISuggestAndSubmit> = ({}) => {
+const SuggestAndSubmit: React.FC<ISuggestAndSubmit> = ({ activeList }) => {
   return (
     <Container>
-      <Suggest />
+      <Suggest activeList={activeList} />
       <SubmitButton />
     </Container>
   )

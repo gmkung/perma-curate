@@ -33,16 +33,17 @@ interface IItem {
 }
 
 const Item: React.FC<IItem> = ({ setActiveList, toggleDropdown, name }) => {
+  const handleItemClick = (event) => {
+    event.stopPropagation()
+    setActiveList(name)
+    toggleDropdown()
+  }
+
   return (
-    <Container
-      key={name}
-      onClick={() => {
-        setActiveList(name)
-        toggleDropdown()
-      }}
-    >
+    <Container key={name} onClick={handleItemClick}>
       {name}
     </Container>
   )
 }
+
 export default Item
