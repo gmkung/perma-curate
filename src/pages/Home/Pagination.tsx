@@ -1,12 +1,22 @@
 import React, { Dispatch, SetStateAction, useState } from 'react'
-import styled from 'styled-components'
-import Button from '~src/components/Button'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
+import Button from 'components/Button'
 
 const Container = styled.div`
+  display: flex;
+  flex-direction: column;
   width: 80%;
   margin: 48px auto 0;
   display: flex;
-  justify-content: space-between;
+  gap: 12px;
+
+  ${landscapeStyle(
+    () => css`
+      flex-direction: row;
+      justify-content: space-between;
+    `
+  )}
 `
 
 const PageControls = styled.div`

@@ -1,5 +1,6 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
 import { useToggle } from 'react-use'
 import TotalEntries from './TotalEntries'
 import RightDirectionIcon from 'tsx:svgs/icons/right-direction.svg'
@@ -8,19 +9,32 @@ import DownDirectionIcon from 'tsx:svgs/icons/down-direction.svg'
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  width: 80%;
+  width: 84vw;
   margin-bottom: 12px;
   border-radius: 12px;
   background: #380c65;
   padding: 20px 32px;
   cursor: pointer;
   box-sizing: border-box;
+
+  ${landscapeStyle(
+    () => css`
+      width: 80%;
+    `
+  )}
 `
 
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 16px;
+
+  ${landscapeStyle(
+    () => css`
+      flex-direction: row;
+    `
+  )}
 `
 
 const TextContainer = styled.div`

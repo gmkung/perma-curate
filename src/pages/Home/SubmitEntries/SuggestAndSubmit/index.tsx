@@ -1,12 +1,20 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
 import SubmitButton from './SubmitButton'
 import Suggest from './Suggest'
 
 const Container = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 28px;
+  flex-wrap: wrap;
+
+  ${landscapeStyle(
+    () => css`
+      flex-direction: row;
+    `
+  )}
 `
 
 interface ISuggestAndSubmit {

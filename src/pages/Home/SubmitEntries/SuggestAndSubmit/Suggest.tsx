@@ -21,6 +21,10 @@ const StyledA = styled.a`
   color: #fff;
 `
 
+const TooltipContainer = styled.div`
+  display: flex;
+`
+
 interface ISuggest {
   activeList: string
 }
@@ -46,7 +50,7 @@ const Suggest: React.FC<ISuggest> = ({ activeList }) => {
       <StyledA href={getUrl()} target="_blank">
         Suggest entry
       </StyledA>
-      <div
+      <TooltipContainer
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
       >
@@ -55,10 +59,10 @@ const Suggest: React.FC<ISuggest> = ({ activeList }) => {
           <Tooltip>
             If you don't want to take the risk <br />
             submitting items on-chain, you can make <br />
-            off-chain submissions via this Google Form
+            off-chain submissions via this Google Form.
           </Tooltip>
         )}
-      </div>
+      </TooltipContainer>
     </Container>
   )
 }

@@ -1,11 +1,17 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
 
 const StyledA = styled.a`
   font-size: 16px;
   color: #9c46ff;
   text-decoration: underline;
-  align-self: flex-end;
+
+  ${landscapeStyle(
+    () => css`
+      align-self: flex-end;
+    `
+  )}
 `
 
 interface ILearnMore {}

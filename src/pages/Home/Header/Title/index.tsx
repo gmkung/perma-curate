@@ -1,15 +1,22 @@
 import React, { Dispatch, SetStateAction } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
 import DropdownButton from './DropdownButton'
 import LogoImage from './LogoImage'
 import ProductName from './ProductName'
 
 const Container = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 16px;
   justify-content: center;
   align-items: center;
+
+  ${landscapeStyle(
+    () => css`
+      flex-direction: row;
+    `
+  )}
 `
 
 interface ITitle {

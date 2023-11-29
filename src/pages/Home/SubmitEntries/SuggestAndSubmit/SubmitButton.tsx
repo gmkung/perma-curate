@@ -1,5 +1,6 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
 import { useToggle } from 'react-use'
 import AddEntryModal from '../AddEntryModal'
 
@@ -13,6 +14,13 @@ const StyledButton = styled.button`
   border: none;
   font-weight: 700;
   cursor: pointer;
+  width: 100%;
+
+  ${landscapeStyle(
+    () => css`
+      width: auto;
+    `
+  )}
 `
 
 interface ISubmitButton {}

@@ -1,11 +1,22 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
 import LearnMore from './LearnMore'
 
 const Container = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 8px;
+
+  ${landscapeStyle(
+    () => css`
+      flex-direction: row;
+    `
+  )}
+`
+
+const StyledText = styled.text`
+  display: flex;
 `
 
 interface IEarnRewards {}
@@ -13,7 +24,7 @@ interface IEarnRewards {}
 const EarnRewards: React.FC<IEarnRewards> = ({}) => {
   return (
     <Container>
-      <text>{`Submit & earn rewards`}</text>
+      <StyledText>{`Submit & earn rewards`}</StyledText>
       <LearnMore />
     </Container>
   )

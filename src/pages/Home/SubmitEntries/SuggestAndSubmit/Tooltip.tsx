@@ -12,9 +12,9 @@ const TooltipContainer = styled.div`
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
   z-index: 100;
   top: 100%;
-  left: 50%;
+  left: 60%;
   transform: translateX(-50%);
-  white-space: nowrap;
+  width: 320px;
 `
 
 interface ITooltipProps {

@@ -1,12 +1,19 @@
 import React, { Dispatch, SetStateAction } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
 
 const Container = styled.div`
   display: flex;
-  width: 80%;
+  width: 84vw;
   margin-bottom: 24px;
+  flex-direction: column;
 
-  box-sizing: border-box;
+  ${landscapeStyle(
+    () => css`
+      width: 80%;
+      flex-direction: row;
+    `
+  )}
 `
 
 const StyledLabel = styled.label`
@@ -16,19 +23,24 @@ const StyledLabel = styled.label`
   font-weight: bold;
   font-size: 20px;
   padding: 16px 32px;
-  border-radius: 12px 0 0 12px;
+  border-radius: 12px;
   color: white;
+
+  ${landscapeStyle(
+    () => css`
+      border-radius: 12px 0 0 12px;
+    `
+  )}
 `
 
 const StyledInput = styled.input`
-  display: block;
-  padding-left: 24px;
+  display: flex;
+  padding: 12px;
   outline: none;
   border: 2px solid #805ad5;
   border-left: 0;
   color: #2d3748;
-  border-radius: 0 12px 12px 0;
-  width: 100%;
+  border-radius: 12px;
   font-family: 'Orbitron', sans-serif;
   font-size: 20px;
   font-weight: 700;
@@ -38,6 +50,14 @@ const StyledInput = styled.input`
     font-weight: 700;
     color: #c7c7c7;
   }
+
+  ${landscapeStyle(
+    () => css`
+      width: 100%;
+      padding-left: 24px;
+      border-radius: 0 12px 12px 0;
+    `
+  )}
 `
 
 interface ISearch {
