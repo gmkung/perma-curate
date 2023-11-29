@@ -10,6 +10,7 @@ const Container = styled.div`
   margin: 48px auto 0;
   display: flex;
   gap: 12px;
+  align-items: center;
 
   ${landscapeStyle(
     () => css`

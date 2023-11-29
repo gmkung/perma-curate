@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
 import { useToggle } from 'react-use'
 import TotalEntries from './TotalEntries'
+import { calcMinMax } from 'utils/calcMinMax'
 import RightDirectionIcon from 'tsx:svgs/icons/right-direction.svg'
 import DownDirectionIcon from 'tsx:svgs/icons/down-direction.svg'
 
@@ -10,10 +11,10 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 84vw;
-  margin-bottom: 12px;
+  margin-bottom: ${calcMinMax(8, 12)};
   border-radius: 12px;
   background: #380c65;
-  padding: 20px 32px;
+  padding: ${calcMinMax(16, 20)} ${calcMinMax(20, 32)};
   cursor: pointer;
   box-sizing: border-box;
 
@@ -27,14 +28,9 @@ const Container = styled.div`
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
-  flex-direction: column;
+  flex-direction: row;
   gap: 16px;
-
-  ${landscapeStyle(
-    () => css`
-      flex-direction: row;
-    `
-  )}
+  flex-wrap: wrap;
 `
 
 const TextContainer = styled.div`

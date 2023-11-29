@@ -1,18 +1,19 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
+import { calcMinMax } from 'utils/calcMinMax'
 import EarnRewards from './EarnRewards'
 import SuggestAndSubmit from './SuggestAndSubmit'
 
 const Container = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   width: 84vw;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: ${calcMinMax(16, 24)};
   border-radius: 12px;
   background: #380c65;
-  padding: 16px 32px;
+  padding: 16px ${calcMinMax(20, 32)};
   font-family: 'Orbitron', sans-serif;
   font-weight: 700;
   justify-content: space-between;
@@ -24,7 +25,6 @@ const Container = styled.div`
   ${landscapeStyle(
     () => css`
       width: 80%;
-      flex-direction: row;
       align-items: center;
     `
   )}

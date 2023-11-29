@@ -1,6 +1,7 @@
 import React, { Dispatch, SetStateAction } from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
+import { calcMinMax } from 'utils/calcMinMax'
 import Entry from './Entry'
 
 const EntriesContainer = styled.div`
@@ -8,7 +9,7 @@ const EntriesContainer = styled.div`
   margin: auto;
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  gap: 28px 54px;
+  gap: ${calcMinMax(12, 16)};
   justify-content: center;
 
   ${landscapeStyle(

@@ -1,11 +1,12 @@
 import React, { Dispatch, SetStateAction } from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
+import { calcMinMax } from 'utils/calcMinMax'
 
 const Container = styled.div`
   display: flex;
   width: 84vw;
-  margin-bottom: 24px;
+  margin-bottom: ${calcMinMax(16, 24)};
   flex-direction: column;
 
   ${landscapeStyle(
@@ -18,12 +19,13 @@ const Container = styled.div`
 
 const StyledLabel = styled.label`
   display: flex;
+  max-width: 80px;
   background-color: #883ae1;
   font-family: 'Orbitron', sans-serif;
   font-weight: bold;
   font-size: 20px;
   padding: 16px 32px;
-  border-radius: 12px;
+  border-radius: 12px 12px 0 0;
   color: white;
 
   ${landscapeStyle(
@@ -41,6 +43,7 @@ const StyledInput = styled.input`
   border-left: 0;
   color: #2d3748;
   border-radius: 12px;
+  border-radius: 0 12px 12px 12px;
   font-family: 'Orbitron', sans-serif;
   font-size: 20px;
   font-weight: 700;

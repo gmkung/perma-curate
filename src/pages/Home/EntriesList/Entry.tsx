@@ -16,6 +16,7 @@ const Container = styled.div`
   background-color: #380c65;
   padding: 16px;
   border-radius: 12px;
+  border: 1px solid #3c1b5c;
   word-break: break-word;
   transition: transform 150ms ease-in-out, box-shadow 150ms ease-in-out;
   &:hover {
