@@ -1,16 +1,12 @@
 import React from 'react'
 import styled from 'styled-components'
+import KlerosLogo from 'tsx:svgs/header/kleros-pnk-logo.svg'
 
-const StyledImage = styled.img`
+const StyledKlerosLogo = styled(KlerosLogo)`
   height: 48px;
 `
 
 const LogoImage: React.FC = () => {
-  return (
-    <StyledImage
-      src="https://cryptologos.cc/logos/kleros-pnk-logo.svg?v=026"
-      alt="Kleros"
-    />
-  )
+  return <StyledKlerosLogo />
 }
 export default LogoImage
