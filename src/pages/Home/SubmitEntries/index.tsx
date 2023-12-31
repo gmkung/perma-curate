@@ -30,21 +30,11 @@ const Container = styled.div`
   )}
 `
 
-interface ISubmitEntries {
-  activeList: any
-  depositParams: any
-  curateContractAddress: string
-}
-
-const SubmitEntries: React.FC<ISubmitEntries> = ({
-  activeList,
-  depositParams,
-  curateContractAddress,
-}) => {
+const SubmitEntries: React.FC = () => {
   return (
     <Container>
       <EarnRewards />
-      <SuggestAndSubmit activeList={activeList} />
+      <SuggestAndSubmit />
     </Container>
   )
 }

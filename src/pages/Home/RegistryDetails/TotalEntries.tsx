@@ -11,19 +11,25 @@ const StyledP = styled.p<{ isExpanded: boolean }>`
 
 interface ITotalEntries {
   loading: boolean
-  filteredData: any
+  itemCount: number | null
   isExpanded: boolean
 }
 
 const TotalEntries: React.FC<ITotalEntries> = ({
   loading,
-  filteredData,
+  itemCount,
   isExpanded,
 }) => {
   return (
     <StyledP isExpanded={isExpanded}>
       Total entries:{' '}
-      {loading ? <i>&nbsp;calculating...</i> : filteredData.length}
+      {loading ? (
+        <i>&nbsp;calculating...</i>
+      ) : itemCount === null ? (
+        '???'
+      ) : (
+        itemCount
+      )}
     </StyledP>
   )
 }

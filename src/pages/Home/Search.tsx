@@ -1,4 +1,6 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { useDebounce } from 'react-use'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
 import { calcMinMax } from 'utils/calcMinMax'
@@ -63,19 +65,52 @@ const StyledInput = styled.input`
   )}
 `
 
-interface ISearch {
-  searchTerm: string
-  setSearchTerm: Dispatch<SetStateAction<string>>
-}
+const Search: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchTerm, setSearchTerm] = useState<string>('')
+  // prevent rebouncing if search was already applied
+  const [appliedSearch, setAppliedSearch] = useState<boolean>(true)
 
-const Search: React.FC<ISearch> = ({ searchTerm, setSearchTerm }) => {
+  useEffect(() => {
+    setSearchTerm(searchParams.get('text') || '')
+    setAppliedSearch(true)
+  }, [searchParams])
+
+  const applySearch = () => {
+    if (!appliedSearch) {
+      setSearchParams((prev) => {
+        const prevParams = prev.toString()
+        const newParams = new URLSearchParams(prevParams)
+        newParams.delete('text')
+        newParams.append('text', searchTerm)
+        // bounce to page 1
+        newParams.delete('page')
+        newParams.append('page', '1')
+        return newParams
+      })
+      setAppliedSearch(true)
+    }
+  }
+  useDebounce(
+    () => {
+      applySearch()
+    },
+    500,
+    [searchTerm]
+  )
+
+  const changeSearchTerm = (text: string) => {
+    setAppliedSearch(false)
+    setSearchTerm(text)
+  }
+  
   return (
     <Container>
       <StyledLabel>Search</StyledLabel>
       <StyledInput
         type="text"
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={(e) => changeSearchTerm(e.target.value)}
         placeholder="Enter keywords, Ethereum address, etc..."
       />
     </Container>

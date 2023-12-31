@@ -22,11 +22,12 @@
     "build": "parcel build"
   },
   "dependencies": {
-    "@apollo/client": "^3.8.6",
     "@ethersproject/providers": "^5.7.2",
     "@ethersproject/units": "^5.7.0",
+    "@tanstack/react-query": "^5.12.2",
     "ethers": "^6.8.0",
     "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
     "overlayscrollbars": "^2.3.0",
     "overlayscrollbars-react": "^0.5.2",
     "react": "^18.0.0",
@@ -42,6 +43,7 @@
   "devDependencies": {
     "@parcel/transformer-svg-react": "2.8.3",
     "@parcel/watcher": "~2.2.0",
+    "@tanstack/eslint-plugin-query": "^5.12.1",
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
@@ -49,6 +51,7 @@
     "@types/react-router-dom": "5.3.3",
     "@types/styled-components": "^5.1.26",
     "autoprefixer": "^10.0.0",
+    "buffer": "^5.5.0",
     "eslint": "^8.0.0",
     "eslint-import-resolver-parcel": "^1.10.6",
     "eslint-plugin-react": "^7.0.0",
@@ -75,6 +78,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true
   },
   "volta": {
     "node": "16.20.1",

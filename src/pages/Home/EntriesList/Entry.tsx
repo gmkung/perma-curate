@@ -2,8 +2,9 @@ import React from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
 import AddressDisplay from 'components/AddressDisplay'
-import { fetchFromIPFS } from 'utils/fetchFromIPFS'
-import { fetchEvidence } from 'utils/getEvidence'
+import { GraphItem, Prop, registryMap } from '~src/utils/fetchItems'
+import { useSearchParams } from 'react-router-dom'
+import { formatEther } from 'ethers'
 
 const Container = styled.div`
   display: flex;
@@ -47,95 +48,89 @@ const Image = styled.img<{ isFullWidth: boolean }>`
   ${({ isFullWidth }) => isFullWidth && 'width: 100%; height: 100%;'}
 `
 
-const handleEntryClick = async (
-  item: any,
-  setDetailsData,
-  setEntryStatus,
-  setItemId,
-  setEvidences,
-  setIsDetailsModalOpen
-) => {
-  const details = await fetchFromIPFS(item.data)
-  setDetailsData(details.values)
-  setEntryStatus(item.status)
-  setItemId(item.itemID)
-
-  // Fetch evidences
-
-  //const evidenceData = await item.requests[item.numberOfRequests - 1].evidences;
-
-  const evidenceData = await fetchEvidence(
-    item.requests[item.numberOfRequests - 1].evidenceGroup.id
-  )
-
-  const formattedEvidences = await Promise.all(
-    evidenceData.map(async (e: any) => {
-      const evi = await fetchFromIPFS(e.URI)
-      return {
-        title: evi.title,
-        description: evi.description,
-        time: new Date(e.timestamp * 1000).toLocaleString('en-GB'),
-        party: e.party,
-      }
-    })
-  )
-  setEvidences(formattedEvidences as any)
-
-  setIsDetailsModalOpen(true)
-}
-
 interface IEntry {
-  item
-  setDetailsData
-  setEntryStatus
-  setItemId
-  setEvidences
-  setIsDetailsModalOpen
-  activeList
+  item: GraphItem
 }
 
-const Entry: React.FC<IEntry> = ({
-  item,
-  setDetailsData,
-  setEntryStatus,
-  setItemId,
-  setEvidences,
-  setIsDetailsModalOpen,
-  activeList,
-}) => {
+const Status: React.FC<{
+  status:
+    | 'Registered'
+    | 'Absent'
+    | 'RegistrationRequested'
+    | 'ClearingRequested'
+  disputed: boolean
+  bounty: string
+}> = ({ status, disputed, bounty }) => {
+  const readableStatusMap = {
+    Registered: 'Registered',
+    Absent: 'Removed',
+    RegistrationRequested: 'Submitted',
+    ClearingRequested: 'Removing',
+  }
+  const challengedStatusMap = {
+    RegistrationRequested: 'Challenged Submission',
+    ClearingRequested: 'Challenged Removal',
+  }
+  const label = disputed
+    ? challengedStatusMap[status]
+    : readableStatusMap[status]
+
+  const readableBounty =
+    (status === 'ClearingRequested' || status === 'RegistrationRequested') &&
+    !disputed
+      ? Number(formatEther(bounty))
+      : null
+
+  return (
+    <StatusSpan status={label}>
+      {label}
+      {readableBounty ? ' — ' + readableBounty + ' xDAI' : ''}
+    </StatusSpan>
+  )
+}
+
+const Entry: React.FC<IEntry> = ({ item }) => {
+  const [, setSearchParams] = useSearchParams()
+
+  const handleEntryClick = () => {
+    setSearchParams((prev) => {
+      const prevParams = prev.toString()
+      const newParams = new URLSearchParams(prevParams)
+      newParams.append('itemdetails', item.id)
+      return newParams
+    })
+  }
   return (
     <Container
-      onClick={() =>
-        handleEntryClick(
-          item,
-          setDetailsData,
-          setEntryStatus,
-          setItemId,
-          setEvidences,
-          setIsDetailsModalOpen
-        )
-      }
+      onClick={() => {
+        handleEntryClick()
+      }}
     >
-      <StatusSpan status={item.status}>{item.status}</StatusSpan>
+      <Status
+        status={item.status}
+        disputed={item.disputed}
+        bounty={item.requests[0].deposit}
+      />
 
       <strong>
         <AddressDisplay address={item.key0} />
       </strong>
 
-      {activeList === 'Tags' && (
+      {item.registryAddress === registryMap['Tags'] && (
         <div>
           <div>{item.key2}</div>
           <div>{item.key1}</div>
           <div>{item.key3}</div>
         </div>
       )}
-      {activeList === 'Tokens' && (
+      {item.registryAddress === registryMap['Tokens'] && (
         <div>
           {item.props && item.props.find((prop) => prop.label === 'Logo') && (
             <div>
               <Image
                 src={`https://ipfs.kleros.io/${
-                  item.props.find((prop) => prop.label === 'Logo').value
+                  (item.props.find((prop) => prop.label === 'Logo') as Prop)
+                    .value
                 }`}
                 alt="Logo"
                 isFullWidth={false}
@@ -146,22 +141,9 @@ const Entry: React.FC<IEntry> = ({
           <div>{item.key1}</div>
         </div>
       )}
-      {activeList === 'CDN' && (
+      {item.registryAddress === registryMap['CDN'] && (
         <div>
           <div>{item.key1}</div>
-          {item.props &&
-            item.props.find((prop) => prop.label === 'Visual proof') && (
-              <div>
-                <Image
-                  src={`https://ipfs.kleros.io/${
-                    item.props.find((prop) => prop.label === 'Visual proof')
-                      .value
-                  }`}
-                  alt="Visual Proof"
-                  isFullWidth={true}
-                />
-              </div>
-            )}
         </div>
       )}
     </Container>

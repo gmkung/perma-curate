@@ -1,8 +1,10 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
 import { calcMinMax } from 'utils/calcMinMax'
 import Entry from './Entry'
+import { ITEMS_PER_PAGE } from '..'
+import { GraphItem } from '~src/utils/fetchItems'
 
 const EntriesContainer = styled.div`
   width: 80%;
@@ -20,37 +22,14 @@ const EntriesContainer = styled.div`
 `
 
 interface IEntriesList {
-  displayedData: any
-  activeList: any
-  setDetailsData: Dispatch<SetStateAction<any>>
-  setEntryStatus: Dispatch<SetStateAction<any>>
-  setItemId: Dispatch<SetStateAction<any>>
-  setEvidences: Dispatch<SetStateAction<any>>
-  setIsDetailsModalOpen: Dispatch<SetStateAction<boolean>>
+  searchData: GraphItem[]
 }
 
-const EntriesList: React.FC<IEntriesList> = ({
-  displayedData,
-  activeList,
-  setDetailsData,
-  setEntryStatus,
-  setItemId,
-  setEvidences,
-  setIsDetailsModalOpen,
-}) => {
+const EntriesList: React.FC<IEntriesList> = ({ searchData }) => {
   return (
     <EntriesContainer>
-      {displayedData.map((item, index) => (
-        <Entry
-          key={index}
-          item={item}
-          activeList={activeList}
-          setDetailsData={setDetailsData}
-          setEntryStatus={setEntryStatus}
-          setItemId={setItemId}
-          setEvidences={setEvidences}
-          setIsDetailsModalOpen={setIsDetailsModalOpen}
-        />
+      {searchData.slice(0, ITEMS_PER_PAGE).map((item) => (
+        <Entry key={item.id} item={item} />
       ))}
     </EntriesContainer>
   )

@@ -1,7 +1,9 @@
+// this file will likely be deleted
+
 import tagsItemTemplate from 'assets/tags-item-template.json'
 import CDNItemTemplate from 'assets/cdn-item-template.json'
 import tokensItemTemplate from 'assets/tokens-item-template.json'
-import { postJsonToKlerosIpfs } from './postJsonToKlerosIpfs'
+import ipfsPublish from './ipfsPublish'
 import { initiateTransactionToCurate } from './initiateTransactionToCurate'
 
 export const handleFormSubmit = async (

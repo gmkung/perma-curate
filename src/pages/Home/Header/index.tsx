@@ -1,7 +1,7 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-import Description from './Description'
 import Title from './Title'
+import { calcMinMax } from 'utils/calcMinMax'
 
 const Container = styled.div`
   display: flex;
@@ -9,16 +9,21 @@ const Container = styled.div`
   gap: 16px;
 `
 
-interface IHeader {
-  activeList: string
-  setActiveList: Dispatch<SetStateAction<string>>
-}
+const StyledText = styled.text`
+  font-size: 20px;
+  font-family: 'Orbitron', sans-serif;
+  text-align: center;
+  color: #d6d6d6;
+  margin-bottom: ${calcMinMax(24, 34)};
+`
 
-const Header: React.FC<IHeader> = ({ activeList, setActiveList }) => {
+const Header: React.FC = () => {
   return (
     <Container>
-      <Title activeList={activeList} setActiveList={setActiveList} />
-      <Description />
+      <Title />
+      <StyledText>
+        Crowdsourced contract metadata for the Ethereum ecosystem.
+      </StyledText>
     </Container>
   )
 }

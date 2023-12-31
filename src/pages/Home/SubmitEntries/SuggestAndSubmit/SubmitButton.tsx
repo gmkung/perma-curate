@@ -4,8 +4,10 @@ import { landscapeStyle } from 'styles/landscapeStyle'
 import { useToggle } from 'react-use'
 import AddEntryModal from '../AddEntryModal'
 
+// previous purple color, swapped to signal its in construction
+// background-color: #883ae1;
 const StyledButton = styled.button`
-  background-color: #883ae1;
+  background-color: gray;
   border-radius: 12px;
   font-size: 22px;
   font-family: 'Orbitron', sans-serif;
@@ -13,28 +15,25 @@ const StyledButton = styled.button`
   padding: 14px 20px;
   border: none;
   font-weight: 700;
-  cursor: pointer;
+  cursor: not-allowed;
   width: 100%;
-
-  ${landscapeStyle(
-    () => css`
-      width: auto;
-    `
-  )}
+    ${landscapeStyle(
+      () => css`
+        width: auto;
+      `
+    )};
 `
 
-interface ISubmitButton {}
-
-const SubmitButton: React.FC<ISubmitButton> = ({}) => {
-  const [isAddEntryModalOpen, toggleAddEntryModal] = useToggle(false)
-
+const SubmitButton: React.FC = () => {
+  //const [isAddEntryModalOpen, toggleAddEntryModal] = useToggle(false)
+  // TODO
   return (
     <>
       {' '}
-      <StyledButton onClick={toggleAddEntryModal}>Submit entry</StyledButton>
-      {isAddEntryModalOpen && (
+      <StyledButton onClick={() => {}}>Submit entry 🚧</StyledButton>
+      {/* {isAddEntryModalOpen && (
         <AddEntryModal toggleAddEntryModal={toggleAddEntryModal} />
-      )}
+      )} */}
     </>
   )
 }

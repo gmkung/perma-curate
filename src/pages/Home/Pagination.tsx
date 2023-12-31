@@ -1,7 +1,8 @@
-import React, { Dispatch, SetStateAction, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
 import Button from 'components/Button'
+import { useSearchParams } from 'react-router-dom'
 
 const Container = styled.div`
   display: flex;
@@ -40,16 +41,35 @@ const Span = styled.span`
 `
 
 interface IPagination {
-  totalPages: number
-  setCurrentPage: Dispatch<SetStateAction<number>>
+  totalPages: number | null
 }
 
-const Pagination: React.FC<IPagination> = ({ totalPages, setCurrentPage }) => {
-  const [pageInput, setPageInput] = useState<number>(1)
+const Pagination: React.FC<IPagination> = ({ totalPages }) => {
+  let [searchParams, setSearchParams] = useSearchParams()
+  const page = Number(searchParams.get('page'))
 
+  const [pageInput, setPageInput] = useState<number>(page)
+
+  useEffect(() => {
+    setPageInput(Number(searchParams.get('page')))
+  }, [searchParams])
+
+  const setCurrentPage = (page: number) => {
+    setSearchParams((prev) => {
+      const prevParams = prev.toString()
+      const newParams = new URLSearchParams(prevParams)
+      newParams.delete('page')
+      newParams.append('page', String(page))
+      return newParams
+    })
+  }
   return (
     <Container>
-      <Button onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}>
+      <Button
+        onClick={() => setCurrentPage(page - 1)}
+        disabled={page <= 1}
+        style={{ cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
+      >
         Previous
       </Button>
       <PageControls>
@@ -58,15 +78,25 @@ const Pagination: React.FC<IPagination> = ({ totalPages, setCurrentPage }) => {
           value={pageInput}
           onChange={(e) =>
             setPageInput(
-              Math.min(Math.max(1, parseInt(e.target.value)), totalPages)
+              Math.min(
+                Math.max(1, parseInt(e.target.value)),
+                totalPages || Infinity
+              )
             )
           }
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') setCurrentPage(pageInput)
+          }}
         />
-        <Span>of {totalPages}</Span>
+        <Span>of {totalPages === null ? '???' : totalPages}</Span>
         <Button onClick={() => setCurrentPage(pageInput)}>Go</Button>
       </PageControls>
       <Button
-        onClick={() => setCurrentPage((page) => Math.min(page + 1, totalPages))}
+        onClick={() => setCurrentPage(page + 1)}
+        disabled={page >= (totalPages || Infinity)}
+        style={{
+          cursor: page >= (totalPages || Infinity) ? 'not-allowed' : 'pointer',
+        }}
       >
         Next
       </Button>
