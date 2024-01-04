@@ -4,7 +4,7 @@ import { landscapeStyle } from 'styles/landscapeStyle'
 import { calcMinMax } from 'utils/calcMinMax'
 import Entry from './Entry'
 import { ITEMS_PER_PAGE } from '..'
-import { GraphItem } from '~src/utils/fetchItems'
+import { GraphItem } from 'utils/fetchItems'
 
 const EntriesContainer = styled.div`
   width: 80%;

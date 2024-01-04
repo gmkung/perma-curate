@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import 'overlayscrollbars/styles/overlayscrollbars.css'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { OverlayScrollContext } from 'context/OverlayScrollContext'
-import Home from '~src/pages/Home'
+import Home from 'pages/Home'
 import StyledComponentsProvider from 'context/StyledComponentsProvider'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 

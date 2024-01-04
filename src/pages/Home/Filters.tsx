@@ -1,9 +1,9 @@
 import React from 'react'
 import { useSearchParams } from 'react-router-dom'
 import styled, { css } from 'styled-components'
-import Button from '~src/components/Button'
-import { landscapeStyle } from '~src/styles/landscapeStyle'
-import { calcMinMax } from '~src/utils/calcMinMax'
+import Button from 'components/Button'
+import { landscapeStyle } from 'styles/landscapeStyle'
+import { calcMinMax } from 'utils/calcMinMax'
 
 const LabelsContainer = styled.div`
   display: flex;

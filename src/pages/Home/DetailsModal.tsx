@@ -6,14 +6,14 @@ import { statusColorMap } from 'utils/colorMappings'
 import { performEvidenceBasedRequest } from 'utils/performEvidenceBasedRequest'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { fetchItemDetails } from '~src/utils/itemDetails'
+import { fetchItemDetails } from 'utils/itemDetails'
 import LoadingItems from './LoadingItems'
-import { useFocusOutside } from '~src/hooks/useFocusOutside'
+import { useFocusOutside } from 'hooks/useFocusOutside'
 import {
   DepositParams,
   fetchRegistryDeposits,
-} from '~src/utils/fetchRegistryDeposits'
-import { fetchArbitrationCost } from '~src/utils/fetchArbitrationCost'
+} from 'utils/fetchRegistryDeposits'
+import { fetchArbitrationCost } from 'utils/fetchArbitrationCost'
 import { formatEther } from 'ethers'
 
 const ModalOverlay = styled.div`

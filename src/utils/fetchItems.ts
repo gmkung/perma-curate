@@ -1,5 +1,5 @@
 import { gql, request } from 'graphql-request'
-import { ITEMS_PER_PAGE } from '~src/pages/Home'
+import { ITEMS_PER_PAGE } from 'pages/Home'
 
 export const registryMap = {
   Tags: '0x66260c69d03837016d88c9877e61e08ef74c59f2',

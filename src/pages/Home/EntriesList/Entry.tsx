@@ -2,7 +2,7 @@ import React from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
 import AddressDisplay from 'components/AddressDisplay'
-import { GraphItem, Prop, registryMap } from '~src/utils/fetchItems'
+import { GraphItem, Prop, registryMap } from 'utils/fetchItems'
 import { useSearchParams } from 'react-router-dom'
 import { formatEther } from 'ethers'
 
@@ -52,7 +52,7 @@ interface IEntry {
   item: GraphItem
 }
 
-const Status: React.FC<{
+interface IStatus {
   status:
     | 'Registered'
     | 'Absent'
@@ -60,7 +60,9 @@ const Status: React.FC<{
     | 'ClearingRequested'
   disputed: boolean
   bounty: string
-}> = ({ status, disputed, bounty }) => {
+}
+
+const Status: React.FC<IStatus> = ({ status, disputed, bounty }) => {
   const readableStatusMap = {
     Registered: 'Registered',
     Absent: 'Removed',

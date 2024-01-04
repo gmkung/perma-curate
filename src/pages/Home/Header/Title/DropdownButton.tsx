@@ -2,7 +2,7 @@ import React, { useRef } from 'react'
 import styled, { css } from 'styled-components'
 import { useToggle } from 'react-use'
 import { useSearchParams } from 'react-router-dom'
-import { useFocusOutside } from '~src/hooks/useFocusOutside'
+import { useFocusOutside } from 'hooks/useFocusOutside'
 
 const dropdownStyles = css`
   border-radius: 16px;
@@ -14,7 +14,11 @@ const dropdownStyles = css`
   transition: all 0.3s ease;
 `
 
-const StyledButton = styled.button<{ open: boolean }>`
+interface IButton {
+  open: boolean
+}
+
+const StyledButton = styled.button<IButton>`
   ${dropdownStyles}
   display: flex;
   align-items: center;
@@ -72,8 +76,8 @@ const Item: React.FC<IItem> = ({ toggleDropdown, name }) => {
       newParams.delete('registry')
       newParams.append('registry', name)
       // bounce to page 1
-      newParams.delete("page")
-      newParams.append("page", "1")
+      newParams.delete('page')
+      newParams.append('page', '1')
       return newParams
     })
     toggleDropdown()
