@@ -2,6 +2,7 @@
   "name": "@kleros/perma-curate",
   "source": "src/index.html",
   "version": "0.1.0",
+  "license": "MIT",
   "alias": {
     "src": "./src",
     "utils": "./src/utils",
