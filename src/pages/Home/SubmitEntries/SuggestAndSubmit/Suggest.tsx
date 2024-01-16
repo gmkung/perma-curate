@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import styled from 'styled-components'
 import InfoIcon from 'tsx:svgs/icons/info.svg'
 import Tooltip from './Tooltip'
+import { useSearchParams } from 'react-router-dom'
 
 const Container = styled.div`
   display: flex;
@@ -25,12 +26,10 @@ const TooltipContainer = styled.div`
   display: flex;
 `
 
-interface ISuggest {
-  activeList: string
-}
-
-const Suggest: React.FC<ISuggest> = ({ activeList }) => {
+const Suggest: React.FC = () => {
   const [isHovering, setIsHovering] = useState(false)
+  let [searchParams] = useSearchParams()
+  const activeList = searchParams.get('registry')
 
   const getUrl = () => {
     switch (activeList) {

@@ -17,14 +17,10 @@ const Container = styled.div`
   )}
 `
 
-interface ISuggestAndSubmit {
-  activeList: string
-}
-
-const SuggestAndSubmit: React.FC<ISuggestAndSubmit> = ({ activeList }) => {
+const SuggestAndSubmit: React.FC = () => {
   return (
     <Container>
-      <Suggest activeList={activeList} />
+      <Suggest />
       <SubmitButton />
     </Container>
   )

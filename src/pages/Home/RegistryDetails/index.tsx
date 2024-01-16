@@ -58,14 +58,15 @@ const StyledP = styled.p`
 
 interface IRegistryDetails {
   loading: boolean
-  filteredData: any
+  itemCount: number | null
 }
 
 const RegistryDetails: React.FC<IRegistryDetails> = ({
   loading,
-  filteredData,
+  itemCount,
 }) => {
   const [isExpanded, toggleExpand] = useToggle(false)
+  // todo refactor when multiple registries?
 
   return (
     <Container onClick={toggleExpand}>
@@ -80,7 +81,7 @@ const RegistryDetails: React.FC<IRegistryDetails> = ({
           <TotalEntries
             isExpanded={false}
             loading={loading}
-            filteredData={filteredData}
+            itemCount={itemCount}
           />
         ) : null}
       </Header>
@@ -90,7 +91,7 @@ const RegistryDetails: React.FC<IRegistryDetails> = ({
         <TotalEntries
           isExpanded={true}
           loading={loading}
-          filteredData={filteredData}
+          itemCount={itemCount}
         />
         <StyledP>
           Description: A list of public name tags, associated with contract

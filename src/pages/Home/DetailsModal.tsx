@@ -1,9 +1,20 @@
-import React, { Dispatch, SetStateAction, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import ReactMarkdown from 'react-markdown'
 import { renderValue } from 'utils/renderValue'
 import { statusColorMap } from 'utils/colorMappings'
 import { performEvidenceBasedRequest } from 'utils/performEvidenceBasedRequest'
+import { useSearchParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { fetchItemDetails } from 'utils/itemDetails'
+import LoadingItems from './LoadingItems'
+import { useFocusOutside } from 'hooks/useFocusOutside'
+import {
+  DepositParams,
+  fetchRegistryDeposits,
+} from 'utils/fetchRegistryDeposits'
+import { fetchArbitrationCost } from 'utils/fetchArbitrationCost'
+import { formatEther } from 'ethers'
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -169,167 +180,238 @@ const NoEvidenceText = styled.div`
   font-style: italic;
 `
 
-interface IDetailsModal {
-  setIsDetailsModalOpen: Dispatch<SetStateAction<boolean>>
-  curateContractAddress: string
-  depositParams: any
-  itemId: string
-  entryStatus: any
-  detailsData: any
-  evidences: any
-}
-
-const DetailsModal: React.FC<IDetailsModal> = ({
-  setIsDetailsModalOpen,
-  curateContractAddress,
-  depositParams,
-  itemId,
-  entryStatus,
-  detailsData,
-  evidences,
-}) => {
+const DetailsModal: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
   const [evidenceConfirmationType, setEvidenceConfirmationType] = useState('')
   const [evidenceTitle, setEvidenceTitle] = useState('')
   const [evidenceText, setEvidenceText] = useState('')
 
+  const itemDetailsId = useMemo(
+    () => searchParams.get('itemdetails'),
+    [searchParams]
+  )
+
+  const {
+    isLoading: detailsLoading,
+    error: detailsError,
+    data: detailsData,
+  } = useQuery({
+    queryKey: ['details', itemDetailsId || ''],
+    queryFn: () => fetchItemDetails(itemDetailsId || ''),
+  })
+
+  // the registry can be fetched directly from itemDetailsId.
+  const registryParsedFromItemId = itemDetailsId
+    ? itemDetailsId.split('@')[1]
+    : ''
+
+  const {
+    isLoading: depositsLoading,
+    error: depositsError,
+    data: depositsData,
+  } = useQuery({
+    queryKey: ['deposits', registryParsedFromItemId],
+    queryFn: () => fetchRegistryDeposits(registryParsedFromItemId),
+  })
+
+  // get arbitrationCost, keyed by arbitrator and arbitratorExtraData
+  const {
+    isLoading: arbitrationCostLoading,
+    error: arbitrationCostError,
+    data: arbitrationCostData,
+  } = useQuery({
+    queryKey: [
+      'arbitrationCost',
+      detailsData?.requests?.[0].arbitrator || '',
+      detailsData?.requests?.[0].arbitratorExtraData || '',
+    ],
+    queryFn: () =>
+      fetchArbitrationCost(
+        detailsData?.requests?.[0].arbitrator || '',
+        detailsData?.requests?.[0].arbitratorExtraData || ''
+      ),
+  })
+
+  const evidences = useMemo(() => {
+    if (!detailsData) return []
+    return detailsData.requests.map((r) => r.evidenceGroup.evidences).flat(1)
+  }, [detailsData])
+
+  const closeModal = () => {
+    setSearchParams((prev) => {
+      const prevParams = prev.toString()
+      const newParams = new URLSearchParams(prevParams)
+      newParams.delete('itemdetails')
+      return newParams
+    })
+    setIsConfirmationOpen(false)
+  }
+  const containerRef = useRef(null)
+  useFocusOutside(containerRef, () => closeModal())
+
+  const formattedDepositCost = useMemo(() => {
+    if (!detailsData || !depositsData || !arbitrationCostData) return '??? xDAI'
+    let sum = 0n
+    if (detailsData.status === 'Registered') {
+      sum = arbitrationCostData + depositsData.removalBaseDeposit
+    } else if (detailsData.status === 'RegistrationRequested') {
+      sum = arbitrationCostData + depositsData.submissionChallengeBaseDeposit
+    } else if (detailsData.status === 'ClearingRequested') {
+      sum = arbitrationCostData + depositsData.removalChallengeBaseDeposit
+    }
+    return `${Number(formatEther(sum))} xDAI`
+  }, [detailsData, depositsData, arbitrationCostData])
+
   return (
     <ModalOverlay>
-      <ModalContainer>
+      <ModalContainer ref={containerRef}>
         <CloseButton
           onClick={() => {
-            setIsDetailsModalOpen(false)
-            setIsConfirmationOpen(false)
+            closeModal()
           }}
         >
           X
         </CloseButton>
 
-        {/* Confirmation Box */}
-        {isConfirmationOpen && (
-          <ConfirmationBox>
-            <ConfirmationTitle>
-              {(() => {
-                switch (evidenceConfirmationType) {
-                  case 'Evidence':
-                    return 'Enter the evidence message you want to submit'
-                  case 'RegistrationRequested':
-                    return 'Provide a reason for challenging this entry'
-                  case 'Registered':
-                    return 'Provide a reason for removing this entry'
-                  case 'ClearingRequested':
-                    return 'Provide a reason for challenging this removal request'
-                  default:
-                    return 'Default message'
-                }
-              })()}
-            </ConfirmationTitle>
-            <label>Message title</label>
-            <TextArea
-              rows={1}
-              value={evidenceTitle}
-              onChange={(e) => setEvidenceTitle(e.target.value)}
-            ></TextArea>
-            <label>Evidence message</label>
-            <TextArea
-              rows={3}
-              value={evidenceText}
-              onChange={(e) => setEvidenceText(e.target.value)}
-            ></TextArea>
-            <ButtonGroup>
-              <ActionButton
-                isConfirm={isConfirmationOpen}
-                onClick={() => setIsConfirmationOpen(false)}
-              >
-                Cancel
-              </ActionButton>
-              <ActionButton
-                isConfirm={isConfirmationOpen}
-                onClick={async () => {
-                  let result = false // a flag to check if the function execution was successful
-                  result = await performEvidenceBasedRequest(
-                    curateContractAddress,
-                    depositParams,
-                    itemId,
-                    evidenceTitle,
-                    evidenceText,
-                    evidenceConfirmationType
-                  )
+        {detailsLoading || !detailsData ? (
+          <LoadingItems />
+        ) : (
+          <>
+            {/* Confirmation Box */}
+            {isConfirmationOpen && (
+              <ConfirmationBox>
+                <ConfirmationTitle>
+                  {(() => {
+                    switch (evidenceConfirmationType) {
+                      case 'Evidence':
+                        return 'Enter the evidence message you want to submit'
+                      case 'RegistrationRequested':
+                        return 'Provide a reason for challenging this entry'
+                      case 'Registered':
+                        return 'Provide a reason for removing this entry'
+                      case 'ClearingRequested':
+                        return 'Provide a reason for challenging this removal request'
+                      default:
+                        return 'Default message'
+                    }
+                  })()}
+                </ConfirmationTitle>
+                <label>Message title</label>
+                <TextArea
+                  rows={1}
+                  value={evidenceTitle}
+                  onChange={(e) => setEvidenceTitle(e.target.value)}
+                ></TextArea>
+                <label>Evidence message</label>
+                <TextArea
+                  rows={3}
+                  value={evidenceText}
+                  onChange={(e) => setEvidenceText(e.target.value)}
+                ></TextArea>
+                <ButtonGroup>
+                  <ActionButton
+                    isConfirm={isConfirmationOpen}
+                    onClick={() => setIsConfirmationOpen(false)}
+                  >
+                    Cancel
+                  </ActionButton>
+                  <ActionButton
+                    isConfirm={isConfirmationOpen}
+                    onClick={async () => {
+                      let result = false // a flag to check if the function execution was successful
+                      result = await performEvidenceBasedRequest(
+                        detailsData,
+                        depositsData as DepositParams,
+                        arbitrationCostData as bigint,
+                        evidenceTitle,
+                        evidenceText,
+                        evidenceConfirmationType
+                      )
 
-                  // Check if the function was executed successfully
-                  if (result) {
-                    setIsDetailsModalOpen(false)
-                  }
-                }}
-              >
-                Confirm
-              </ActionButton>
-            </ButtonGroup>
-          </ConfirmationBox>
-        )}
-
-        {/* Status-based Button */}
-        <StatusButton
-          onClick={() => {
-            setIsConfirmationOpen(true)
-            setEvidenceConfirmationType(entryStatus)
-          }}
-          status={entryStatus}
-        >
-          {entryStatus === 'Registered' && 'Remove entry'}
-          {entryStatus === 'RegistrationRequested' && 'Challenge registration'}
-          {entryStatus === 'ClearingRequested' && 'Challenge removal'}
-        </StatusButton>
-
-        {/* DETAILS */}
-        <DetailsContent>
-          <EntryDetailsHeader>Entry details</EntryDetailsHeader>
-          <EntryDetailsContainer>
-            <StatusSpan status={entryStatus}>{entryStatus}</StatusSpan>
-            {detailsData &&
-              Object.entries(detailsData).map(([key, value], idx) => (
-                <div key={idx}>
-                  <strong>{key}:</strong> {renderValue(key, value)}
-                </div>
-              ))}
-          </EntryDetailsContainer>
-          {/* EVIDENCES */}
-          <EvidenceSection>
-            <EvidenceSectionHeader>
-              <EvidenceHeader>Evidences</EvidenceHeader>
-              <SubmitEvidenceButton
-                onClick={() => {
-                  setIsConfirmationOpen(true)
-                  setEvidenceConfirmationType('Evidence')
-                }}
-              >
-                Submit Evidence
-              </SubmitEvidenceButton>
-            </EvidenceSectionHeader>
-
-            {evidences.length > 0 ? (
-              evidences.map((evidence, idx) => (
-                <Evidence key={idx}>
-                  <EvidenceTitle>
-                    <strong>Title:</strong> {evidence.title}
-                  </EvidenceTitle>
-                  <EvidenceDescription>
-                    <strong>Description:</strong>
-                    <ReactMarkdown>{evidence.description}</ReactMarkdown>
-                  </EvidenceDescription>
-                  <EvidenceTime>
-                    <strong>Time:</strong> {evidence.time}
-                  </EvidenceTime>
-                  <EvidenceParty>
-                    <strong>Party:</strong> {evidence.party}
-                  </EvidenceParty>
-                </Evidence>
-              ))
-            ) : (
-              <NoEvidenceText>No evidence submitted yet...</NoEvidenceText>
+                      // Check if the function was executed successfully
+                      if (result) {
+                        closeModal()
+                      }
+                    }}
+                  >
+                    Confirm
+                  </ActionButton>
+                </ButtonGroup>
+              </ConfirmationBox>
             )}
-          </EvidenceSection>
-        </DetailsContent>
+
+            {/* Status-based Button */}
+            <StatusButton
+              onClick={() => {
+                setIsConfirmationOpen(true)
+                setEvidenceConfirmationType(detailsData.status)
+              }}
+              status={detailsData.status}
+            >
+              {detailsData.status === 'Registered' && `Remove entry`}
+              {detailsData.status === 'RegistrationRequested' &&
+                'Challenge registration'}
+              {detailsData.status === 'ClearingRequested' &&
+                'Challenge removal'}
+              {' — ' + formattedDepositCost}
+            </StatusButton>
+
+            {/* DETAILS */}
+            <DetailsContent>
+              <EntryDetailsHeader>Entry details</EntryDetailsHeader>
+              <EntryDetailsContainer>
+                <StatusSpan status={detailsData.status}>
+                  {detailsData.status}
+                </StatusSpan>
+                {detailsData.props &&
+                  detailsData.props.map(({ label, value }) => (
+                    <div key={label}>
+                      <strong>{label}:</strong> {renderValue(label, value)}
+                    </div>
+                  ))}
+              </EntryDetailsContainer>
+              {/* EVIDENCES */}
+              <EvidenceSection>
+                <EvidenceSectionHeader>
+                  <EvidenceHeader>Evidences</EvidenceHeader>
+                  <SubmitEvidenceButton
+                    onClick={() => {
+                      setIsConfirmationOpen(true)
+                      setEvidenceConfirmationType('Evidence')
+                    }}
+                  >
+                    Submit Evidence
+                  </SubmitEvidenceButton>
+                </EvidenceSectionHeader>
+
+                {evidences.length > 0 ? (
+                  evidences.map((evidence, idx) => (
+                    <Evidence key={idx}>
+                      <EvidenceTitle>
+                        <strong>Title:</strong> {evidence.title}
+                      </EvidenceTitle>
+                      <EvidenceDescription>
+                        <strong>Description:</strong>
+                        <ReactMarkdown>
+                          {evidence.description || ''}
+                        </ReactMarkdown>
+                      </EvidenceDescription>
+                      <EvidenceTime>
+                        <strong>Time:</strong> {evidence.timestamp}
+                      </EvidenceTime>
+                      <EvidenceParty>
+                        <strong>Party:</strong> {evidence.party}
+                      </EvidenceParty>
+                    </Evidence>
+                  ))
+                ) : (
+                  <NoEvidenceText>No evidence submitted yet...</NoEvidenceText>
+                )}
+              </EvidenceSection>
+            </DetailsContent>
+          </>
+        )}
       </ModalContainer>
     </ModalOverlay>
   )

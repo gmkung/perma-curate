@@ -1,9 +1,19 @@
-import React, { Dispatch, SetStateAction } from 'react'
+import React from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
 import DropdownButton from './DropdownButton'
-import LogoImage from './LogoImage'
-import ProductName from './ProductName'
+import { Link } from 'react-router-dom'
+import KlerosLogo from 'tsx:svgs/header/kleros-pnk-logo.svg'
+
+const StyledKlerosLogo = styled(KlerosLogo)`
+  height: 48px;
+`
+
+const StyledText = styled.text`
+  font-size: 48px;
+  text-align: center;
+  font-family: 'Orbitron', sans-serif;
+`
 
 const Container = styled.div`
   display: flex;
@@ -19,18 +29,15 @@ const Container = styled.div`
   )}
 `
 
-interface ITitle {
-  activeList: string
-  setActiveList: Dispatch<SetStateAction<string>>
-}
-
-const index: React.FC<ITitle> = ({ activeList, setActiveList }) => {
+const Title: React.FC = () => {
   return (
     <Container>
-      <LogoImage />
-      <ProductName />
-      <DropdownButton activeList={activeList} setActiveList={setActiveList} />
+      <StyledKlerosLogo />
+      <Link to={'/'}>
+        <StyledText>Kleros Scout</StyledText>
+      </Link>
+      <DropdownButton />
     </Container>
   )
 }
-export default index
+export default Title

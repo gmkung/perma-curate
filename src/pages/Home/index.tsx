@@ -1,23 +1,19 @@
-import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
-import { Contract, JsonRpcProvider, formatEther } from 'ethers'
-import 'react-toastify/dist/ReactToastify.css'
-import arbitratorABI from 'utils/abi/kleros-liquid-abi.json'
-
-import { fetchTags } from 'utils/getAddressTagsFromSubgraph'
-import { fetchCDN } from 'utils/getCDNFromSubgraph'
-import { fetchTokens } from 'utils/getTokensFromSubgraph'
-import { DepositParamsType } from 'utils/performEvidenceBasedRequest'
-import klerosCurateABI from 'utils/abi/kleros-curate-abi.json'
+import { useQuery } from '@tanstack/react-query'
+import React, { useEffect, useMemo } from 'react'
+import { useSearchParams, createSearchParams } from 'react-router-dom'
+import { fetchItems } from 'utils/fetchItems'
 import Header from './Header'
-import Search from './Search'
-import EntriesList from './EntriesList'
-import LoadingItems from './LoadingItems'
-import Pagination from './Pagination'
-import Footer from 'components/Footer'
-import DetailsModal from './DetailsModal'
+import styled from 'styled-components'
 import RegistryDetails from './RegistryDetails'
 import SubmitEntries from './SubmitEntries'
+import Search from './Search'
+import LoadingItems from './LoadingItems'
+import EntriesList from './EntriesList'
+import Footer from 'components/Footer'
+import Pagination from './Pagination'
+import { fetchItemCounts } from 'utils/itemCounts'
+import DetailsModal from './DetailsModal'
+import Filters from './Filters'
 
 const Container = styled.div`
   display: flex;
@@ -29,197 +25,169 @@ const Container = styled.div`
   padding: 32px;
 `
 
-declare global {
-  interface Window {
-    ethereum: any
-  }
-}
+export const ITEMS_PER_PAGE = 20
 
-const Home = ({}: { items: any }) => {
-  //Initiation
-  const [activeList, setActiveList] = useState<'Tags' | 'CDN' | 'Tokens'>(
-    'Tags'
+const Home: React.FC = () => {
+  let [searchParams, setSearchParams] = useSearchParams()
+
+  const searchQueryKeys = useMemo(
+    () => [
+      searchParams.getAll('registry').toString(),
+      searchParams.getAll('status').toString(),
+      searchParams.getAll('disputed').toString(),
+      searchParams.getAll('network').toString(),
+      searchParams.get('text'),
+      searchParams.get('page'),
+      searchParams.get('orderDirection'),
+    ],
+    [searchParams]
   )
 
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const isDetailsModalOpen = useMemo(
+    () => !!searchParams.get('itemdetails'),
+    [searchParams]
+  )
 
-  //navigation and search
-  const [searchTerm, setSearchTerm] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-
-  //for the pop-up to display details and evidence
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
-
-  const [detailsData, setDetailsData] = useState(null)
-  const [evidences, setEvidences] = useState<any[]>([])
-  const [entryStatus, setEntryStatus] = useState('')
-  const [itemId, setItemId] = useState('')
-
-  //contract state management
-  const [curateContractAddress, setCurateContractAddress] = useState('')
-  const [depositParams, setDepositParams] = useState<DepositParamsType>(null)
-
-  useEffect(() => {
-    switch (activeList) {
-      case 'Tags':
-        setCurateContractAddress('0x66260C69d03837016d88c9877e61e08Ef74C59F2')
-        break
-      case 'CDN':
-        setCurateContractAddress('0x957a53a994860be4750810131d9c876b2f52d6e1')
-        break
-      case 'Tokens':
-        setCurateContractAddress('0xee1502e29795ef6c2d60f8d7120596abe3bad990')
-        break
-      default:
-        console.error('Invalid active list type:', activeList)
-    }
-  }, [activeList])
-
-  useEffect(() => {
-    const ARBITRATORCONTRACTADDRESS =
-      '0x9C1dA9A04925bDfDedf0f6421bC7EEa8305F9002'
-    const PROVIDER = new JsonRpcProvider('https://rpc.ankr.com/gnosis')
-    const CONTRACT = new Contract(
-      curateContractAddress,
-      klerosCurateABI,
-      PROVIDER
-    )
-    const ARBCONTRACT = new Contract(
-      ARBITRATORCONTRACTADDRESS,
-      arbitratorABI,
-      PROVIDER
-    )
-
-    let isMounted = true // To handle cleanup
-
-    CONTRACT.arbitratorExtraData()
-      .then((result) => {
-        const arbitratorExtraData = result
-        return Promise.all([
-          CONTRACT.submissionBaseDeposit(),
-          CONTRACT.submissionChallengeBaseDeposit(),
-          CONTRACT.removalBaseDeposit(),
-          CONTRACT.removalChallengeBaseDeposit(),
-          ARBCONTRACT.arbitrationCost(arbitratorExtraData),
-        ])
-      })
-      .then((results) => {
-        if (isMounted) {
-          // Only update state if component is still mounted
-          setDepositParams({
-            submissionBaseDeposit: parseFloat(formatEther(results[0])),
-            submissionChallengeBaseDeposit: parseFloat(formatEther(results[1])),
-            removalBaseDeposit: parseFloat(formatEther(results[2])),
-            removalChallengeBaseDeposit: parseFloat(formatEther(results[3])),
-            arbitrationCost: parseFloat(formatEther(results[4])),
-          })
-          console.log('DONE')
-        }
-      })
-      .catch((error) => {
-        console.error('Error fetching deposit params:', error)
-      })
-
-    return () => {
-      isMounted = false // Cleanup
-    }
-  }, [curateContractAddress])
-
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        let fetchedItems
-        setItems([])
-        setLoading(true)
-        switch (activeList) {
-          case 'Tags':
-            fetchedItems = await fetchTags() // Assuming fetchTags fetches for Tags
-            break
-          case 'CDN':
-            fetchedItems = await fetchCDN() // Create a fetchCDN function
-            break
-          case 'Tokens':
-            fetchedItems = await fetchTokens() // Create a fetchTokens function
-            break
-        }
-        setItems(fetchedItems as any)
-      } catch (err: any) {
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchItems()
-  }, [activeList])
-
-  const itemsPerPage = 20
-
-  // Filter and paginate data
-  const filteredData = items.filter((item: any) => {
-    for (let key in item) {
-      if (typeof item[key] === 'string' && item[key].includes(searchTerm)) {
-        return true
-      } else if (
-        typeof item[key] === 'number' &&
-        item[key].toString().includes(searchTerm)
-      ) {
-        return true
-      }
-      // Add more conditions if there are other data types to consider.
-    }
-    return false
+  const {
+    isLoading: searchLoading,
+    error: searchError,
+    data: searchData,
+  } = useQuery({
+    queryKey: ['fetch', ...searchQueryKeys],
+    queryFn: () => fetchItems(searchParams),
+  })
+  const {
+    isLoading: countsLoading,
+    error: countsError,
+    data: countsData,
+  } = useQuery({
+    queryKey: ['counts', ...searchQueryKeys],
+    queryFn: () => fetchItemCounts(),
   })
 
-  const displayedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  )
+  const currentItemCount = useMemo(() => {
+    const registry = searchParams.getAll('registry')
+    const status = searchParams.getAll('status')
+    const disputed = searchParams.getAll('disputed')
+    const network = searchParams.getAll('network')
+    const text = searchParams.get('text')
+    const page = searchParams.get('page')
+    if (
+      countsLoading ||
+      registry.length === 0 ||
+      status.length === 0 ||
+      disputed.length === 0 ||
+      network.length === 0 ||
+      page === null ||
+      !countsData
+    ) {
+      // defaults or counts unloaded yet
+      return undefined
+    } else if (!text && network.length === 4) {
+      // can use the subgraph category counts.
+      const getCount = (registry: 'Tags' | 'Tokens' | 'CDN') => {
+        return (
+          (status.includes('Absent') && disputed.includes('false')
+            ? countsData[registry].numberOfAbsent
+            : 0) +
+          (status.includes('Registered') && disputed.includes('false')
+            ? countsData[registry].numberOfRegistered
+            : 0) +
+          (status.includes('RegistrationRequested') &&
+          disputed.includes('false')
+            ? countsData[registry].numberOfRegistrationRequested
+            : 0) +
+          (status.includes('RegistrationRequested') && disputed.includes('true')
+            ? countsData[registry].numberOfChallengedRegistrations
+            : 0) +
+          (status.includes('ClearingRequested') && disputed.includes('false')
+            ? countsData[registry].numberOfClearingRequested
+            : 0) +
+          (status.includes('ClearingRequested') && disputed.includes('true')
+            ? countsData[registry].numberOfChallengedClearing
+            : 0)
+        )
+      }
 
-  //For pagination
+      const count =
+        (registry.includes('Tags') ? getCount('Tags') : 0) +
+        (registry.includes('CDN') ? getCount('CDN') : 0) +
+        (registry.includes('Tokens') ? getCount('Tokens') : 0)
+      return count
+    } else {
+      // complex query. can only be known if last query has >21 items.
+      // o.w nullify.
+      if (!searchData || searchData.length > ITEMS_PER_PAGE) return null
+      else {
+        // for each previous page, thats guaranteed 20 items
+        // + remainder of last page
+        return searchData.length + (Number(page) - 1) * ITEMS_PER_PAGE
+      }
+    }
+  }, [searchParams, countsData, countsLoading, searchData])
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  // If missing search params, insert defaults.
+  useEffect(() => {
+    const registry = searchParams.getAll('registry')
+    const status = searchParams.getAll('status')
+    const disputed = searchParams.getAll('disputed')
+    const network = searchParams.getAll('network')
+    const text = searchParams.get('text')
+    const page = searchParams.get('page')
+    const orderDirection = searchParams.get('orderDirection')
+    if (
+      registry.length === 0 ||
+      status.length === 0 ||
+      disputed.length === 0 ||
+      network.length === 0 ||
+      orderDirection === null ||
+      page === null
+    ) {
+      const newSearchParams = createSearchParams({
+        registry: registry.length === 0 ? ['Tags'] : registry,
+        status:
+          status.length === 0
+            ? ['Registered', 'RegistrationRequested', 'ClearingRequested']
+            : status,
+        disputed: disputed.length === 0 ? ['true', 'false'] : disputed,
+        network: network.length === 0 ? ['1', '100', '137', '56'] : network,
+        text: text === null ? '' : text,
+        page: page === null ? '1' : page,
+        orderDirection: orderDirection === null ? 'desc' : orderDirection,
+      })
+      setSearchParams(newSearchParams, { replace: true })
+    }
+  }, [searchParams, setSearchParams])
+
+  const totalPages =
+    currentItemCount !== null && currentItemCount !== undefined
+      ? Math.ceil(currentItemCount / ITEMS_PER_PAGE)
+      : null // in complex query, cannot provide this information
 
   return (
     <Container>
-      <Header activeList={activeList} setActiveList={setActiveList} />
-      <RegistryDetails loading={loading} filteredData={filteredData} />
-      <SubmitEntries
-        activeList={activeList}
-        depositParams={depositParams}
-        curateContractAddress={curateContractAddress}
+      <Header />
+      <RegistryDetails
+        loading={searchLoading}
+        itemCount={
+          currentItemCount === null || currentItemCount === undefined
+            ? null
+            : currentItemCount
+        }
       />
-      <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <SubmitEntries />
+      <Search />
+      <Filters />
 
-      {loading ? (
+      {searchLoading || !searchData ? (
         <LoadingItems />
       ) : (
-        <EntriesList
-          displayedData={displayedData}
-          activeList={activeList}
-          setDetailsData={setDetailsData}
-          setEvidences={setEvidences}
-          setEntryStatus={setEntryStatus}
-          setItemId={setItemId}
-          setIsDetailsModalOpen={setIsDetailsModalOpen}
-        />
+        <EntriesList searchData={searchData} />
       )}
-      <Pagination totalPages={totalPages} setCurrentPage={setCurrentPage} />
+      <Pagination totalPages={totalPages} />
       <Footer />
 
-      {isDetailsModalOpen && (
-        <DetailsModal
-          setIsDetailsModalOpen={setIsDetailsModalOpen}
-          curateContractAddress={curateContractAddress}
-          depositParams={depositParams}
-          itemId={itemId}
-          entryStatus={entryStatus}
-          detailsData={detailsData}
-          evidences={evidences}
-        />
-      )}
+      {isDetailsModalOpen && <DetailsModal />}
     </Container>
   )
 }

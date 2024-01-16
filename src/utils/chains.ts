@@ -10,7 +10,7 @@ export const references = [
     id: "56",
     namespaceId: "eip155",
     name: "Binance Smart Chain",
-    label: "BNB",
+    label: "BSC",
     explorer: "bscscan.com",
   },
   {
