@@ -10,10 +10,9 @@ const Container = styled.div`
   flex-direction: row;
   width: 84vw;
   align-items: flex-start;
-  margin-bottom: ${calcMinMax(16, 24)};
   border-radius: 12px;
   background: #380c65;
-  padding: 16px ${calcMinMax(20, 32)};
+  padding: 8px ${calcMinMax(8, 12)};
   font-family: 'Orbitron', sans-serif;
   font-weight: 700;
   justify-content: space-between;

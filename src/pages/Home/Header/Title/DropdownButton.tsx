@@ -9,7 +9,7 @@ const dropdownStyles = css`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   border: none;
   font-size: 16px;
-  padding: 10px 20px;
+  padding: 8px 20px;
   cursor: pointer;
   transition: all 0.3s ease;
 `
@@ -24,8 +24,10 @@ const StyledButton = styled.button<IButton>`
   align-items: center;
   justify-content: space-between;
   font-weight: bold;
+  font-size: 48px;
+  font-family: 'Orbitron', sans-serif;
   position: relative;
-  background: linear-gradient(145deg, #9575cd, #6c43ab);
+  background: linear-gradient(145deg, #380C65, #481C75);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
   color: white;
 
@@ -46,7 +48,7 @@ const StyledButton = styled.button<IButton>`
   }
 `
 
-const ItemContainer = styled.button`
+const ItemContainer = styled.div`
   ${dropdownStyles}
   display: block;
   width: 100%;

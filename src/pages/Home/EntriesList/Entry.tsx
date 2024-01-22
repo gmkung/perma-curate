@@ -6,19 +6,13 @@ import { GraphItem, Prop, registryMap } from 'utils/fetchItems'
 import { useSearchParams } from 'react-router-dom'
 import { formatEther } from 'ethers'
 
-const Container = styled.div`
-  display: flex;
-  width: 84vw;
-  flex-direction: column;
-  box-sizing: border-box;
-  gap: 8px;
-  justify-content: center;
-  align-items: center;
+const Card = styled.div`
   background-color: #380c65;
-  padding: 16px;
   border-radius: 12px;
-  border: 1px solid #3c1b5c;
-  word-break: break-word;
+  color: white;
+  font-family: 'Oxanium', sans-serif;
+  width: 84vw;
+  box-sizing: border-box;
   transition: transform 150ms ease-in-out, box-shadow 150ms ease-in-out;
   &:hover {
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
@@ -34,12 +28,40 @@ const Container = styled.div`
   )}
 `
 
-const StatusSpan = styled.span<{ status: string }>`
-  display: inline-block;
-  padding: 4px 8px;
-  color: white;
-  border-radius: 4px;
-  margin-top: 8px;
+const CardStatus = styled.div<{ status: string }>`
+  text-align: center;
+  font-weight: bold;
+  padding-top: 20px;
+  padding-bottom: 15px;
+  margin-bottom: 10px;
+  border-bottom: 3px solid #5a2393;
+
+  &:before {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-bottom: 0px;
+    background-color: ${({ status }) =>
+      ({
+        Registered: '#90EE90',
+        Submitted: '#FFEA00',
+        'Challenged Submission': '#E87B35',
+        'Challenged Removal': '#E87B35',
+        Removed: 'red',
+      }[status] || 'gray')};
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+`
+
+const CardContent = styled.div`
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  padding-bottom: 16px;
 `
 
 const Image = styled.img<{ isFullWidth: boolean }>`
@@ -84,10 +106,10 @@ const Status: React.FC<IStatus> = ({ status, disputed, bounty }) => {
       : null
 
   return (
-    <StatusSpan status={label}>
+    <CardStatus status={label}>
       {label}
       {readableBounty ? ' — ' + readableBounty + ' xDAI' : ''}
-    </StatusSpan>
+    </CardStatus>
   )
 }
 
@@ -103,7 +125,7 @@ const Entry: React.FC<IEntry> = ({ item }) => {
     })
   }
   return (
-    <Container
+    <Card
       onClick={() => {
         handleEntryClick()
       }}
@@ -113,42 +135,42 @@ const Entry: React.FC<IEntry> = ({ item }) => {
         disputed={item.disputed}
         bounty={item.requests[0].deposit}
       />
-
-      <strong>
-        <AddressDisplay address={item.key0} />
-      </strong>
-
-      {item.registryAddress === registryMap['Tags'] && (
-        <div>
-          <div>{item.key2}</div>
-          <div>{item.key1}</div>
-          <div>{item.key3}</div>
-        </div>
-      )}
-      {item.registryAddress === registryMap['Tokens'] && (
-        <div>
-          {item.props && item.props.find((prop) => prop.label === 'Logo') && (
-            <div>
-              <Image
-                src={`https://ipfs.kleros.io/${
-                  (item.props.find((prop) => prop.label === 'Logo') as Prop)
-                    .value
-                }`}
-                alt="Logo"
-                isFullWidth={false}
-              />
-            </div>
-          )}
-          <div>{item.key2}</div>
-          <div>{item.key1}</div>
-        </div>
-      )}
-      {item.registryAddress === registryMap['CDN'] && (
-        <div>
-          <div>{item.key1}</div>
-        </div>
-      )}
-    </Container>
+      <CardContent>
+        <strong>
+          <AddressDisplay address={item.key0} />
+        </strong>
+        {item.registryAddress === registryMap['Tags'] && (
+          <div>
+            <div>{item.key2}</div>
+            <div>{item.key1}</div>
+            <div>{item.key3}</div>
+          </div>
+        )}
+        {item.registryAddress === registryMap['Tokens'] && (
+          <div>
+            {item.props && item.props.find((prop) => prop.label === 'Logo') && (
+              <div>
+                <Image
+                  src={`https://ipfs.kleros.io/${
+                    (item.props.find((prop) => prop.label === 'Logo') as Prop)
+                      .value
+                  }`}
+                  alt="Logo"
+                  isFullWidth={false}
+                />
+              </div>
+            )}
+            <div>{item.key2}</div>
+            <div>{item.key1}</div>
+          </div>
+        )}
+        {item.registryAddress === registryMap['CDN'] && (
+          <div>
+            <div>{item.key1}</div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

@@ -7,6 +7,7 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-left: 12px;
 
   ${landscapeStyle(
     () => css`
@@ -24,7 +25,7 @@ interface IEarnRewards {}
 const EarnRewards: React.FC<IEarnRewards> = ({}) => {
   return (
     <Container>
-      <StyledText>{`Submit & earn rewards`}</StyledText>
+      <StyledText>{`Earn rewards!`}</StyledText>
       <LearnMore />
     </Container>
   )

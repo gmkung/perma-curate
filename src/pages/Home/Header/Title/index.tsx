@@ -2,7 +2,6 @@ import React from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
 import DropdownButton from './DropdownButton'
-import { Link } from 'react-router-dom'
 import KlerosLogo from 'tsx:svgs/header/kleros-pnk-logo.svg'
 
 const StyledKlerosLogo = styled(KlerosLogo)`
@@ -33,9 +32,7 @@ const Title: React.FC = () => {
   return (
     <Container>
       <StyledKlerosLogo />
-      <Link to={'/'}>
-        <StyledText>Kleros Scout</StyledText>
-      </Link>
+      <StyledText>Kleros Scout</StyledText>
       <DropdownButton />
     </Container>
   )

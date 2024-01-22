@@ -82,17 +82,6 @@ export const fetchItems = async (
     .map((chainId) => `{key0_starts_with_nocase: "eip155:${chainId}:"}`)
     .join(',')}]},`
 
-  // todo rethink the "lastId" thing? remove it?
-  // because as it is rn, moving pages in a complex search involving > 1000 items
-  // is going to suck and maybe even break the search!
-
-  // yea I think fuck it. lets do the following
-  // query 21 items, enough to be able to go up a page and check if there's more
-  // show ? total items if you get 21 items out of the buffer.
-  // use deduction to figure out how many items if <21 on current query (counting all previous 20 sized pages.)
-  // that way is fast, you dont get total number but idc.
-  // the main numbers we care about anyway are the "total" numbers, the main counts.
-
   const query = gql`
     query (
       $registry: [String!]!

@@ -8,7 +8,7 @@ import { calcMinMax } from 'utils/calcMinMax'
 const Container = styled.div`
   display: flex;
   width: 84vw;
-  margin-bottom: ${calcMinMax(16, 24)};
+  margin-bottom: ${calcMinMax(4, 8)};
   flex-direction: column;
 
   ${landscapeStyle(

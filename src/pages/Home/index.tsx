@@ -13,6 +13,8 @@ import Footer from 'components/Footer'
 import Pagination from './Pagination'
 import { fetchItemCounts } from 'utils/itemCounts'
 import DetailsModal from './DetailsModal'
+import RegistryDetailsModal from './RegistryDetails/RegistryDetailsModal'
+import { calcMinMax } from 'utils/calcMinMax'
 import Filters from './Filters'
 
 const Container = styled.div`
@@ -22,7 +24,18 @@ const Container = styled.div`
   background: #5a2393;
   min-height: 100vh;
   color: white;
-  padding: 32px;
+  padding: 16px;
+`
+
+const RegistryDetailsAndSubmitContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: #5a2393;
+  color: white;
+  width: 80%;
+  margin-bottom: ${calcMinMax(8, 12)};
+  gap: 12px;
 `
 
 export const ITEMS_PER_PAGE = 20
@@ -48,6 +61,11 @@ const Home: React.FC = () => {
     [searchParams]
   )
 
+  const isRegistryDetailsModalOpen = useMemo(
+    () => !!searchParams.get('registrydetails'),
+    [searchParams]
+  )
+
   const {
     isLoading: searchLoading,
     error: searchError,
@@ -61,7 +79,7 @@ const Home: React.FC = () => {
     error: countsError,
     data: countsData,
   } = useQuery({
-    queryKey: ['counts', ...searchQueryKeys],
+    queryKey: ['counts'],
     queryFn: () => fetchItemCounts(),
   })
 
@@ -167,15 +185,11 @@ const Home: React.FC = () => {
   return (
     <Container>
       <Header />
-      <RegistryDetails
-        loading={searchLoading}
-        itemCount={
-          currentItemCount === null || currentItemCount === undefined
-            ? null
-            : currentItemCount
-        }
-      />
-      <SubmitEntries />
+      <RegistryDetailsAndSubmitContainer>
+        <RegistryDetails />
+        <SubmitEntries />
+      </RegistryDetailsAndSubmitContainer>
+
       <Search />
       <Filters />
 
@@ -188,6 +202,7 @@ const Home: React.FC = () => {
       <Footer />
 
       {isDetailsModalOpen && <DetailsModal />}
+      {isRegistryDetailsModalOpen && <RegistryDetailsModal />}
     </Container>
   )
 }

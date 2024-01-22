@@ -14,7 +14,7 @@ const Container = styled.div`
 
 const StyledA = styled.a`
   font-family: 'Orbitron', sans-serif;
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 700;
   align-self: center;
   text-decoration: underline;
@@ -47,7 +47,7 @@ const Suggest: React.FC = () => {
   return (
     <Container>
       <StyledA href={getUrl()} target="_blank">
-        Suggest entry
+        Suggest
       </StyledA>
       <TooltipContainer
         onMouseEnter={() => setIsHovering(true)}

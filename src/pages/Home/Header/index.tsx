@@ -10,11 +10,11 @@ const Container = styled.div`
 `
 
 const StyledText = styled.text`
-  font-size: 20px;
+  font-size: 16px;
   font-family: 'Orbitron', sans-serif;
   text-align: center;
   color: #d6d6d6;
-  margin-bottom: ${calcMinMax(24, 34)};
+  margin-bottom: ${calcMinMax(12, 16)};
 `
 
 const Header: React.FC = () => {

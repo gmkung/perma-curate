@@ -1,13 +1,9 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
-import { useToggle } from 'react-use'
-import AddEntryModal from '../AddEntryModal'
 
-// previous purple color, swapped to signal its in construction
-// background-color: #883ae1;
 const StyledButton = styled.button`
-  background-color: gray;
+  background-color: #883ae1;
   border-radius: 12px;
   font-size: 22px;
   font-family: 'Orbitron', sans-serif;
@@ -30,7 +26,7 @@ const SubmitButton: React.FC = () => {
   return (
     <>
       {' '}
-      <StyledButton onClick={() => {}}>Submit entry 🚧</StyledButton>
+      <StyledButton onClick={() => {}}>Submit entry</StyledButton>
       {/* {isAddEntryModalOpen && (
         <AddEntryModal toggleAddEntryModal={toggleAddEntryModal} />
       )} */}

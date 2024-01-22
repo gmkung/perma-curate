@@ -12,6 +12,11 @@ const StyledSpan = styled.span<{ bgColor: string }>`
   color: white;
   border-radius: 4px;
   background-color: ${(props) => props.bgColor};
+  margin-right: 4px;
+`
+
+const StyledAddressSpan = styled.span`
+  text-decoration: underline;
 `
 
 const truncateAddress = (addr: string) => {
@@ -32,8 +37,8 @@ const AddressDisplay: React.FC<IAddressDisplay> = ({ address }) => {
 
   return (
     <Container>
-      {truncateAddress(parts[2]) + ' '}
       <StyledSpan bgColor={bgColor}>{reference?.label}</StyledSpan>
+      <StyledAddressSpan>{truncateAddress(parts[2])}</StyledAddressSpan>
     </Container>
   )
 }
