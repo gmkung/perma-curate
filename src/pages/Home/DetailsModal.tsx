@@ -251,7 +251,8 @@ const DetailsModal: React.FC = () => {
   useFocusOutside(containerRef, () => closeModal())
 
   const formattedDepositCost = useMemo(() => {
-    if (!detailsData || !depositsData || !arbitrationCostData) return '??? xDAI'
+    if (!detailsData || !depositsData || arbitrationCostData === undefined)
+      return '??? xDAI'
     let sum = 0n
     if (detailsData.status === 'Registered') {
       sum = arbitrationCostData + depositsData.removalBaseDeposit

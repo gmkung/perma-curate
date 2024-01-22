@@ -66,7 +66,9 @@ const RemovableFilter = styled.div`
   padding-left: 4px;
   padding-right: 4px;
   border-radius: 6px;
-  margin-right: 4px;
+  margin-bottom: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
   max-height: 28px;
 `
 
