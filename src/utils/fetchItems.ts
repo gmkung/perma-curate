@@ -71,7 +71,6 @@ export const fetchItems = async (
     registry.length === 0 ||
     status.length === 0 ||
     disputed.length === 0 ||
-    network.length === 0 ||
     page === 0
   ) {
     // This query is invalid, defaults haven't come yet.
@@ -100,7 +99,7 @@ export const fetchItems = async (
             {disputed_in: $disputed},
             # network section, dynamically generated.
             # only use if needed
-            ${network.length === 4 ? '' : networkQueryObject}
+            ${network.length === 0 ? '' : networkQueryObject}
             # filtering
             {or: [
               {key0_contains_nocase: $text},

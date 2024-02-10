@@ -23,6 +23,13 @@ const FilterDropdown = styled.div<{ open: boolean }>`
   font-family: 'Orbitron', sans-serif;
   display: flex;
   flex-direction: row;
+  padding: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+  &:hover {
+    background: linear-gradient(145deg, #7e57c2, #482c85);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
 `
 
 const FilterDropdownIconWrapper = styled.div<{ open: boolean }>`
@@ -34,9 +41,10 @@ const FilterDropdownIconWrapper = styled.div<{ open: boolean }>`
 const FilterOptionContainer = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: #883ae1;
+  background-color: rgba(136, 34, 233, 0.9);
   margin-top: 30px;
   position: absolute;
+  border-radius: 8px;
 `
 
 // when selected, has a border, bold and more opacity
@@ -47,6 +55,11 @@ const FilterOption = styled.div<{ selected: boolean }>`
   padding: 6px;
   font-weight: ${({ selected }) => (selected ? 'bold' : 'normal')};
   opacity: ${({ selected }) => (selected ? '100%' : '60%')};
+  cursor: pointer;
+  &:hover {
+    background: linear-gradient(145deg, #7e57c2, #482c85);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
 `
 
 // renders right of the dropdown filter
@@ -70,6 +83,11 @@ const RemovableFilter = styled.div`
   margin-left: 2px;
   margin-right: 2px;
   max-height: 28px;
+  cursor: pointer;
+  &:hover {
+    background: linear-gradient(145deg, #7e57c2, #482c85);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
 `
 
 const Statuses: React.FC = () => {
@@ -238,6 +256,8 @@ const Networks: React.FC = () => {
     })
   }
 
+  // todo refactor
+  // adding networks manually should be a crime
   return (
     <FilterContainer>
       <DropdownContainer ref={dropdownRef}>
@@ -256,10 +276,22 @@ const Networks: React.FC = () => {
               Mainnet
             </FilterOption>
             <FilterOption
+              selected={networks.includes('42161')}
+              onClick={() => toggleNetwork('42161')}
+            >
+              Arbitrum One
+            </FilterOption>
+            <FilterOption
+              selected={networks.includes('10')}
+              onClick={() => toggleNetwork('10')}
+            >
+              Optimism
+            </FilterOption>
+            <FilterOption
               selected={networks.includes('100')}
               onClick={() => toggleNetwork('100')}
             >
-              Gnosis
+              Gnosis Chain
             </FilterOption>
             <FilterOption
               selected={networks.includes('137')}
@@ -273,23 +305,64 @@ const Networks: React.FC = () => {
             >
               BSC
             </FilterOption>
+            <FilterOption
+              selected={networks.includes('43114')}
+              onClick={() => toggleNetwork('43114')}
+            >
+              Avalanche C-Chain
+            </FilterOption>
+            <FilterOption
+              selected={networks.includes('42220')}
+              onClick={() => toggleNetwork('42220')}
+            >
+              Celo Mainnet
+            </FilterOption>
+            <FilterOption
+              selected={networks.includes('8453')}
+              onClick={() => toggleNetwork('8453')}
+            >
+              Base Mainnet
+            </FilterOption>
+            <FilterOption
+              selected={networks.includes('250')}
+              onClick={() => toggleNetwork('250')}
+            >
+              Fantom Opera
+            </FilterOption>
+            <FilterOption
+              selected={networks.includes('324')}
+              onClick={() => toggleNetwork('324')}
+            >
+              zkSync
+            </FilterOption>
           </FilterOptionContainer>
         )}
       </DropdownContainer>
       <RemovableFilterContainer>
-        {networks.map((s) => (
-          <RemovableFilter key={s} onClick={() => toggleNetwork(s)}>
-            {
+        {networks.length === 0 ? (
+          <RemovableFilter>All Networks</RemovableFilter>
+        ) : (
+          networks.map((s) => (
+            <RemovableFilter key={s} onClick={() => toggleNetwork(s)}>
               {
-                '1': 'Mainnet',
-                '100': 'Gnosis',
-                '137': 'Polygon',
-                '56': 'BSC',
-              }[s]
-            }{' '}
-            ✕
-          </RemovableFilter>
-        ))}
+                {
+                  '1': 'Mainnet',
+                  '100': 'Gnosis',
+                  '137': 'Polygon',
+                  '56': 'BSC',
+                  '42161': 'Arbitrum One',
+                  '10': 'Optimism',
+                  '43114': 'Avalanche C-Chain',
+                  '42220': 'Celo Mainnet',
+                  '8453': 'Base Mainnet',
+                  '250': 'Fantom Opera',
+                  '324': 'zkSync',
+                }[s]
+              }{' '}
+              ✕
+            </RemovableFilter>
+          ))
+        )}
       </RemovableFilterContainer>
     </FilterContainer>
   )

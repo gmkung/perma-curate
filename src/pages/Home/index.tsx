@@ -16,6 +16,7 @@ import DetailsModal from './DetailsModal'
 import RegistryDetailsModal from './RegistryDetails/RegistryDetailsModal'
 import { calcMinMax } from 'utils/calcMinMax'
 import Filters from './Filters'
+import AddEntryModal from './SubmitEntries/AddEntryModal'
 
 const Container = styled.div`
   display: flex;
@@ -66,6 +67,11 @@ const Home: React.FC = () => {
     [searchParams]
   )
 
+  const isAddItemOpen = useMemo(
+    () => !!searchParams.get('additem'),
+    [searchParams]
+  )
+
   const {
     isLoading: searchLoading,
     error: searchError,
@@ -95,13 +101,12 @@ const Home: React.FC = () => {
       registry.length === 0 ||
       status.length === 0 ||
       disputed.length === 0 ||
-      network.length === 0 ||
       page === null ||
       !countsData
     ) {
       // defaults or counts unloaded yet
       return undefined
-    } else if (!text && network.length === 4) {
+    } else if (!text && network.length === 0) {
       // can use the subgraph category counts.
       const getCount = (registry: 'Tags' | 'Tokens' | 'CDN') => {
         return (
@@ -149,7 +154,6 @@ const Home: React.FC = () => {
     const registry = searchParams.getAll('registry')
     const status = searchParams.getAll('status')
     const disputed = searchParams.getAll('disputed')
-    const network = searchParams.getAll('network')
     const text = searchParams.get('text')
     const page = searchParams.get('page')
     const orderDirection = searchParams.get('orderDirection')
@@ -157,7 +161,6 @@ const Home: React.FC = () => {
       registry.length === 0 ||
       status.length === 0 ||
       disputed.length === 0 ||
-      network.length === 0 ||
       orderDirection === null ||
       page === null
     ) {
@@ -168,7 +171,6 @@ const Home: React.FC = () => {
             ? ['Registered', 'RegistrationRequested', 'ClearingRequested']
             : status,
         disputed: disputed.length === 0 ? ['true', 'false'] : disputed,
-        network: network.length === 0 ? ['1', '100', '137', '56'] : network,
         text: text === null ? '' : text,
         page: page === null ? '1' : page,
         orderDirection: orderDirection === null ? 'desc' : orderDirection,
@@ -203,6 +205,7 @@ const Home: React.FC = () => {
 
       {isDetailsModalOpen && <DetailsModal />}
       {isRegistryDetailsModalOpen && <RegistryDetailsModal />}
+      {isAddItemOpen && <AddEntryModal />}
     </Container>
   )
 }
