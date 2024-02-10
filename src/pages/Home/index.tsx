@@ -87,6 +87,7 @@ const Home: React.FC = () => {
   } = useQuery({
     queryKey: ['counts'],
     queryFn: () => fetchItemCounts(),
+    staleTime: Infinity,
   })
 
   const currentItemCount = useMemo(() => {

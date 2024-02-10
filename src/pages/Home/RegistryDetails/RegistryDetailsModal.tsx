@@ -55,6 +55,7 @@ const RegistryDetailsModal: React.FC = () => {
   } = useQuery({
     queryKey: ['counts'],
     queryFn: () => fetchItemCounts(),
+    staleTime: Infinity,
   })
 
   const registry: FocusedRegistry | undefined = useMemo(() => {

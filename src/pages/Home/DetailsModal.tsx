@@ -15,6 +15,8 @@ import {
 } from 'utils/fetchRegistryDeposits'
 import { fetchArbitrationCost } from 'utils/fetchArbitrationCost'
 import { formatEther } from 'ethers'
+import { fetchItemCounts } from 'utils/itemCounts'
+import { revRegistryMap } from 'utils/fetchItems'
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -199,6 +201,7 @@ const DetailsModal: React.FC = () => {
   } = useQuery({
     queryKey: ['details', itemDetailsId || ''],
     queryFn: () => fetchItemDetails(itemDetailsId || ''),
+    staleTime: Infinity,
   })
 
   // the registry can be fetched directly from itemDetailsId.
@@ -207,13 +210,19 @@ const DetailsModal: React.FC = () => {
     : ''
 
   const {
-    isLoading: depositsLoading,
-    error: depositsError,
-    data: depositsData,
+    isLoading: countsLoading,
+    error: countsError,
+    data: countsData,
   } = useQuery({
-    queryKey: ['deposits', registryParsedFromItemId],
-    queryFn: () => fetchRegistryDeposits(registryParsedFromItemId),
+    queryKey: ['counts'],
+    queryFn: () => fetchItemCounts(),
+    staleTime: Infinity,
   })
+
+  const deposits = useMemo(() => {
+    if (!countsData) return undefined
+    return countsData[revRegistryMap[registryParsedFromItemId]].deposits
+  }, [countsData, registryParsedFromItemId])
 
   // get arbitrationCost, keyed by arbitrator and arbitratorExtraData
   const {
@@ -231,6 +240,7 @@ const DetailsModal: React.FC = () => {
         detailsData?.requests?.[0].arbitrator || '',
         detailsData?.requests?.[0].arbitratorExtraData || ''
       ),
+    staleTime: Infinity,
   })
 
   const evidences = useMemo(() => {
@@ -251,18 +261,18 @@ const DetailsModal: React.FC = () => {
   useFocusOutside(containerRef, () => closeModal())
 
   const formattedDepositCost = useMemo(() => {
-    if (!detailsData || !depositsData || arbitrationCostData === undefined)
+    if (!detailsData || !deposits || arbitrationCostData === undefined)
       return '??? xDAI'
     let sum = 0n
     if (detailsData.status === 'Registered') {
-      sum = arbitrationCostData + depositsData.removalBaseDeposit
+      sum = arbitrationCostData + deposits.removalBaseDeposit
     } else if (detailsData.status === 'RegistrationRequested') {
-      sum = arbitrationCostData + depositsData.submissionChallengeBaseDeposit
+      sum = arbitrationCostData + deposits.submissionChallengeBaseDeposit
     } else if (detailsData.status === 'ClearingRequested') {
-      sum = arbitrationCostData + depositsData.removalChallengeBaseDeposit
+      sum = arbitrationCostData + deposits.removalChallengeBaseDeposit
     }
     return `${Number(formatEther(sum))} xDAI`
-  }, [detailsData, depositsData, arbitrationCostData])
+  }, [detailsData, deposits, arbitrationCostData])
 
   return (
     <ModalOverlay>
@@ -323,7 +333,7 @@ const DetailsModal: React.FC = () => {
                       let result = false // a flag to check if the function execution was successful
                       result = await performEvidenceBasedRequest(
                         detailsData,
-                        depositsData as DepositParams,
+                        deposits as DepositParams,
                         arbitrationCostData as bigint,
                         evidenceTitle,
                         evidenceText,

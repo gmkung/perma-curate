@@ -7,6 +7,12 @@ export const registryMap = {
   Tokens: '0xee1502e29795ef6c2d60f8d7120596abe3bad990',
 }
 
+export const revRegistryMap = {
+  '0x66260c69d03837016d88c9877e61e08ef74c59f2': 'Tags',
+  '0x957a53a994860be4750810131d9c876b2f52d6e1': 'CDN',
+  '0xee1502e29795ef6c2d60f8d7120596abe3bad990': 'Tokens',
+}
+
 export interface GraphItem {
   id: string
   latestRequestSubmissionTime: string
