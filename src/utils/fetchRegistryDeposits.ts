@@ -87,15 +87,18 @@ export const fetchRegistryDeposits = async (
   registry: string
 ): Promise<DepositParams | undefined> => {
   // registry still unknown
+  console.log('from fetchRegistryDeposits', { registry })
   if (!registry) return undefined
 
   const provider = new ethers.JsonRpcProvider("https://rpc.gnosischain.com")
+  console.log("fetchRegistryDeposits provider created")
 
   const lgtcrViewContract = new Contract(
     LGTCRViewAddress,
     LGTCRViewABI,
     provider
   )
+  console.log("contract created, calling func")
   const viewInfo = await lgtcrViewContract.fetchArbitrable(registry)
   const depositParams: DepositParams = {
     submissionBaseDeposit: viewInfo.submissionBaseDeposit,

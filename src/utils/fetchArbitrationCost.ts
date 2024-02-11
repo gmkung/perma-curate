@@ -17,10 +17,13 @@ export const fetchArbitrationCost = async (
   arbitratorExtraData: string
 ): Promise<bigint | undefined> => {
   // itemDetails still unknown
+  console.log('from fetchArbitrationCost', { arbitrator, arbitratorExtraData })
   if (!arbitrator || !arbitratorExtraData) return undefined
 
-  const provider = new ethers.JsonRpcProvider("https://rpc.gnosischain.com")
+  const provider = new ethers.JsonRpcProvider('https://rpc.gnosischain.com')
+  console.log("fetchArbCost provider created")
   const arbitratorContract = new Contract(arbitrator, ArbitratorABI, provider)
+  console.log("contract created, calling func")
   const arbitrationCost = await arbitratorContract.arbitrationCost(
     arbitratorExtraData
   )
