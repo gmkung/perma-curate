@@ -87,31 +87,29 @@ export const fetchRegistryDeposits = async (
   registry: string
 ): Promise<DepositParams | undefined> => {
   // registry still unknown
-  console.log('from fetchRegistryDeposits', { registry })
   if (!registry) return undefined
-  console.log('survived falsy check in fetchRegistryDeposits')
-  console.log(
-    'why does the line below STOP executing the function?!??!?! not even throwing error or logging the statement below or triggering a network request or a cors error?!?!'
-  )
 
-  const test = await fetch('https://rpc.gnosischain.com')
-  console.log('fetch test status code', test.status)
+  try {
+    const provider = new ethers.JsonRpcProvider(
+      'https://rpc.gnosischain.com',
+      100
+    )
 
-  const provider = new ethers.JsonRpcProvider('https://rpc.gnosischain.com')
-  console.log('fetchRegistryDeposits provider created')
-
-  const lgtcrViewContract = new Contract(
-    LGTCRViewAddress,
-    LGTCRViewABI,
-    provider
-  )
-  console.log('contract created, calling func')
-  const viewInfo = await lgtcrViewContract.fetchArbitrable(registry)
-  const depositParams: DepositParams = {
-    submissionBaseDeposit: viewInfo.submissionBaseDeposit,
-    submissionChallengeBaseDeposit: viewInfo.submissionChallengeBaseDeposit,
-    removalBaseDeposit: viewInfo.removalBaseDeposit,
-    removalChallengeBaseDeposit: viewInfo.removalChallengeBaseDeposit,
+    const lgtcrViewContract = new Contract(
+      LGTCRViewAddress,
+      LGTCRViewABI,
+      provider
+    )
+    const viewInfo = await lgtcrViewContract.fetchArbitrable(registry)
+    const depositParams: DepositParams = {
+      submissionBaseDeposit: viewInfo.submissionBaseDeposit,
+      submissionChallengeBaseDeposit: viewInfo.submissionChallengeBaseDeposit,
+      removalBaseDeposit: viewInfo.removalBaseDeposit,
+      removalChallengeBaseDeposit: viewInfo.removalChallengeBaseDeposit,
+    }
+    return depositParams
+  } catch (e) {
+    console.log('fetchRegistryDeposits error!', e)
+    return undefined
   }
-  return depositParams
 }

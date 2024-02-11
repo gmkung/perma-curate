@@ -17,23 +17,23 @@ export const fetchArbitrationCost = async (
   arbitratorExtraData: string
 ): Promise<bigint | undefined> => {
   // itemDetails still unknown
-  console.log('from fetchArbitrationCost', { arbitrator, arbitratorExtraData })
   if (!arbitrator || !arbitratorExtraData) return undefined
-  console.log('survived falsy check in fetchArbitrationCost')
-  console.log(
-    'why does the line below STOP executing the function?!??!?! not even throwing error or logging the statement below or triggering a network request or a cors error?!?!'
-  )
 
-  const test = await fetch('https://rpc.gnosischain.com')
-  console.log('fetch test status code', test.status)
+  try {
+    const provider = new ethers.JsonRpcProvider(
+      'https://rpc.gnosischain.com',
+      100
+    )
 
-  const provider = new ethers.JsonRpcProvider('https://rpc.gnosischain.com')
-  console.log('fetchArbCost provider created')
-  const arbitratorContract = new Contract(arbitrator, ArbitratorABI, provider)
-  console.log('contract created, calling func')
-  const arbitrationCost = await arbitratorContract.arbitrationCost(
-    arbitratorExtraData
-  )
+    const arbitratorContract = new Contract(arbitrator, ArbitratorABI, provider)
 
-  return arbitrationCost
+    const arbitrationCost = await arbitratorContract.arbitrationCost(
+      arbitratorExtraData
+    )
+
+    return arbitrationCost
+  } catch (e) {
+    console.log('fetchArbitrationCost error!', e)
+    return undefined
+  }
 }
