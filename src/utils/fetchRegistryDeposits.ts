@@ -1,4 +1,4 @@
-import { Contract, ethers } from 'ethers'
+import { Contract, JsonRpcProvider } from 'ethers'
 
 export interface DepositParams {
   submissionBaseDeposit: bigint
@@ -90,10 +90,7 @@ export const fetchRegistryDeposits = async (
   if (!registry) return undefined
 
   try {
-    const provider = new ethers.JsonRpcProvider(
-      'https://rpc.gnosischain.com',
-      100
-    )
+    const provider = new JsonRpcProvider('https://rpc.gnosischain.com', 100)
 
     const lgtcrViewContract = new Contract(
       LGTCRViewAddress,
