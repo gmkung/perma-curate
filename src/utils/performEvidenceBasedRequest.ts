@@ -1,5 +1,5 @@
 import ipfsPublish from './ipfsPublish'
-import { Contract, ethers } from 'ethers'
+import { Contract, BrowserProvider } from 'ethers'
 import klerosCurateABI from './abi/kleros-curate-abi.json'
 import { GraphItemDetails } from './itemDetails'
 import { DepositParams } from './fetchRegistryDeposits'
@@ -32,7 +32,7 @@ export async function performEvidenceBasedRequest(
     }
 
     // Initialize the provider from MetaMask or any injected Ethereum provider
-    const provider = new ethers.BrowserProvider(window.ethereum)
+    const provider = new BrowserProvider(window.ethereum)
 
     const signer = await provider.getSigner()
     // Prompt the user to connect their wallet
