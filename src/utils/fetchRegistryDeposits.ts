@@ -89,6 +89,7 @@ export const fetchRegistryDeposits = async (
   // registry still unknown
   console.log('from fetchRegistryDeposits', { registry })
   if (!registry) return undefined
+  console.log("survived falsy check in fetchRegistryDeposits")
 
   const provider = new ethers.JsonRpcProvider("https://rpc.gnosischain.com")
   console.log("fetchRegistryDeposits provider created")
