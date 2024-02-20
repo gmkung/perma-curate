@@ -13,6 +13,20 @@ export const revRegistryMap = {
   '0xee1502e29795ef6c2d60f8d7120596abe3bad990': 'Tokens',
 }
 
+export const relevantNetworks: { chainId: number; name: string }[] = [
+  { chainId: 1, name: 'Mainnet' },
+  { chainId: 100, name: 'Gnosis' },
+  { chainId: 137, name: 'Polygon' },
+  { chainId: 56, name: 'BSC' },
+  { chainId: 42161, name: 'Arbitrum One' },
+  { chainId: 10, name: 'Optimism' },
+  { chainId: 43114, name: 'Avalanche C-Chain' },
+  { chainId: 42220, name: 'Celo Mainnet' },
+  { chainId: 8453, name: 'Base Mainnet' },
+  { chainId: 250, name: 'Fantom Opera' },
+  { chainId: 324, name: 'zkSync' },
+]
+
 export interface GraphItem {
   id: string
   latestRequestSubmissionTime: string

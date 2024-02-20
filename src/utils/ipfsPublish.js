@@ -9,8 +9,11 @@ const mirroredExtensions = ['.json']
  * @returns {Promise<string>} ipfs file path.
  */
 export default async function ipfsPublish(fileName, data) {
-  if (!mirroredExtensions.some((ext) => fileName.endsWith(ext)))
-    return publishToKlerosNode(fileName, data)
+  if (!mirroredExtensions.some((ext) => fileName.endsWith(ext))) {
+    const klerosResult = await publishToKlerosNode(fileName, data)
+    const path = `/ipfs/${klerosResult[1].hash + klerosResult[0].path}`
+    return path
+  }
 
   const [klerosResult, theGraphResult] = await Promise.all([
     publishToKlerosNode(fileName, data),
@@ -26,7 +29,6 @@ export default async function ipfsPublish(fileName, data) {
   }
 
   const path = `/ipfs/${klerosResult[1].hash + klerosResult[0].path}`
-
   return path
 }
 

@@ -5,6 +5,9 @@ export interface DepositParams {
   submissionChallengeBaseDeposit: bigint
   removalBaseDeposit: bigint
   removalChallengeBaseDeposit: bigint
+  arbitrator: string
+  arbitratorExtraData: string
+  arbitrationCost: bigint
 }
 
 const LGTCRViewABI = [
@@ -103,6 +106,9 @@ export const fetchRegistryDeposits = async (
       submissionChallengeBaseDeposit: viewInfo.submissionChallengeBaseDeposit,
       removalBaseDeposit: viewInfo.removalBaseDeposit,
       removalChallengeBaseDeposit: viewInfo.removalChallengeBaseDeposit,
+      arbitrator: viewInfo.arbitrator,
+      arbitratorExtraData: viewInfo.arbitratorExtraData,
+      arbitrationCost: viewInfo.arbitrationCost,
     }
     return depositParams
   } catch (e) {

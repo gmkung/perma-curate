@@ -4,7 +4,8 @@ import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
 import { calcMinMax } from 'utils/calcMinMax'
 import DownDirectionIcon from 'tsx:svgs/icons/down-direction.svg'
-import { useFocusOutside } from '~src/hooks/useFocusOutside'
+import { useFocusOutside } from 'hooks/useFocusOutside'
+import { relevantNetworks } from 'utils/fetchItems'
 
 const FilterContainer = styled.div`
   padding: 4px;
@@ -269,72 +270,15 @@ const Networks: React.FC = () => {
         </FilterDropdown>
         {open && (
           <FilterOptionContainer>
-            <FilterOption
-              selected={networks.includes('1')}
-              onClick={() => toggleNetwork('1')}
-            >
-              Mainnet
-            </FilterOption>
-            <FilterOption
-              selected={networks.includes('42161')}
-              onClick={() => toggleNetwork('42161')}
-            >
-              Arbitrum One
-            </FilterOption>
-            <FilterOption
-              selected={networks.includes('10')}
-              onClick={() => toggleNetwork('10')}
-            >
-              Optimism
-            </FilterOption>
-            <FilterOption
-              selected={networks.includes('100')}
-              onClick={() => toggleNetwork('100')}
-            >
-              Gnosis Chain
-            </FilterOption>
-            <FilterOption
-              selected={networks.includes('137')}
-              onClick={() => toggleNetwork('137')}
-            >
-              Polygon
-            </FilterOption>
-            <FilterOption
-              selected={networks.includes('56')}
-              onClick={() => toggleNetwork('56')}
-            >
-              BSC
-            </FilterOption>
-            <FilterOption
-              selected={networks.includes('43114')}
-              onClick={() => toggleNetwork('43114')}
-            >
-              Avalanche C-Chain
-            </FilterOption>
-            <FilterOption
-              selected={networks.includes('42220')}
-              onClick={() => toggleNetwork('42220')}
-            >
-              Celo Mainnet
-            </FilterOption>
-            <FilterOption
-              selected={networks.includes('8453')}
-              onClick={() => toggleNetwork('8453')}
-            >
-              Base Mainnet
-            </FilterOption>
-            <FilterOption
-              selected={networks.includes('250')}
-              onClick={() => toggleNetwork('250')}
-            >
-              Fantom Opera
-            </FilterOption>
-            <FilterOption
-              selected={networks.includes('324')}
-              onClick={() => toggleNetwork('324')}
-            >
-              zkSync
-            </FilterOption>
+            {relevantNetworks.map((n) => (
+              <FilterOption
+                key={n.chainId}
+                selected={networks.includes(String(n.chainId))}
+                onClick={() => toggleNetwork(String(n.chainId))}
+              >
+                {n.name}
+              </FilterOption>
+            ))}
           </FilterOptionContainer>
         )}
       </DropdownContainer>
@@ -344,22 +288,7 @@ const Networks: React.FC = () => {
         ) : (
           networks.map((s) => (
             <RemovableFilter key={s} onClick={() => toggleNetwork(s)}>
-              {
-                {
-                  '1': 'Mainnet',
-                  '100': 'Gnosis',
-                  '137': 'Polygon',
-                  '56': 'BSC',
-                  '42161': 'Arbitrum One',
-                  '10': 'Optimism',
-                  '43114': 'Avalanche C-Chain',
-                  '42220': 'Celo Mainnet',
-                  '8453': 'Base Mainnet',
-                  '250': 'Fantom Opera',
-                  '324': 'zkSync',
-                }[s]
-              }{' '}
-              ✕
+              {relevantNetworks.find((n) => s === String(n.chainId))?.name} ✕
             </RemovableFilter>
           ))
         )}

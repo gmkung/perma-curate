@@ -2,6 +2,9 @@ import React, { useMemo, useRef } from 'react'
 import styled from 'styled-components'
 import { useFocusOutside } from 'hooks/useFocusOutside'
 import { useSearchParams } from 'react-router-dom'
+import AddAddressTag from './AddTag'
+import AddToken from './AddToken'
+import AddCDN from './AddCDN'
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -17,10 +20,11 @@ const ModalOverlay = styled.div`
 `
 
 const ModalContainer = styled.div`
-  background-color: white;
+  background-color: rgba(180, 60, 243, 0.9);
   padding: 32px;
   border-radius: 12px;
-  width: 50%;
+  width: 80%;
+  height: 70%;
   position: relative;
   overflow-y: auto;
 `
@@ -28,7 +32,10 @@ const ModalContainer = styled.div`
 const AddEntryModal: React.FC = () => {
   const containerRef = useRef(null)
   const [searchParams, setSearchParams] = useSearchParams()
-  const addingItemToRegistry = useMemo(() => searchParams.get('additem'), [searchParams])
+  const addingItemToRegistry = useMemo(
+    () => searchParams.get('additem'),
+    [searchParams]
+  )
 
   const closeModal = () => {
     setSearchParams((prev) => {
@@ -43,7 +50,17 @@ const AddEntryModal: React.FC = () => {
 
   return (
     <ModalOverlay>
-      <ModalContainer ref={containerRef}></ModalContainer>
+      <ModalContainer ref={containerRef}>
+        {addingItemToRegistry === 'Tags' ? (
+          <AddAddressTag />
+        ) : addingItemToRegistry === 'CDN' ? (
+          <AddCDN />
+        ) : addingItemToRegistry === 'Tokens' ? (
+          <AddToken />
+        ) : (
+          <div>????</div>
+        )}
+      </ModalContainer>
     </ModalOverlay>
   )
 }
