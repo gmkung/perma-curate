@@ -7,7 +7,7 @@ import Suggest from './Suggest'
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 20px;
   flex-wrap: wrap;
 
   ${landscapeStyle(

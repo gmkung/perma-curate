@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import styled, { css } from 'styled-components'
-import { landscapeStyle } from 'styles/landscapeStyle'
 import { useQuery } from '@tanstack/react-query'
 import RichAddressForm, { NetworkOption } from './RichAddressForm'
 import getAddressValidationIssue from 'utils/validateAddress'
@@ -10,39 +8,14 @@ import { initiateTransactionToCurate } from 'utils/initiateTransactionToCurate'
 import { fetchItemCounts } from 'utils/itemCounts'
 import { DepositParams } from 'utils/fetchRegistryDeposits'
 import { formatEther } from 'ethers'
-
-export const StyledWholeField = styled.div`
-  display: flex;
-  flex-direction: column;
-`
-
-const StyledTextInput = styled.input`
-  display: flex;
-  padding: 12px;
-  outline: none;
-  border: 2px solid #805ad5;
-  border-left: 0;
-  color: #2d3748;
-  border-radius: 12px;
-  border-radius: 0 12px 12px 12px;
-  font-family: 'Oxanium', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  ::placeholder {
-    font-family: 'Oxanium', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: #c7c7c7;
-  }
-
-  ${landscapeStyle(
-    () => css`
-      width: 100%;
-      padding-left: 24px;
-      border-radius: 0 12px 12px 0;
-    `
-  )}
-`
+import {
+  AddContainer,
+  Buttons,
+  ErrorMessage,
+  ReturnButton,
+  StyledTextInput,
+  SubmitButton,
+} from '.'
 
 const columns = [
   {
@@ -88,8 +61,7 @@ const AddCDN: React.FC = () => {
   const { isLoading: addressIssuesLoading, data: addressIssuesData } = useQuery(
     {
       queryKey: ['addressissues', network.value + ':' + address, 'CDN', '-'],
-      queryFn: () =>
-        getAddressValidationIssue(network.value, address, 'CDN'),
+      queryFn: () => getAddressValidationIssue(network.value, address, 'CDN'),
     }
   )
 
@@ -123,7 +95,7 @@ const AddCDN: React.FC = () => {
     !path
 
   return (
-    <div>
+    <AddContainer>
       <h2>Submit CDN</h2>
       <RichAddressForm
         networkOption={network}
@@ -133,24 +105,29 @@ const AddCDN: React.FC = () => {
         registry="Tags"
       />
       {addressIssuesLoading && 'Loading'}
-      {addressIssuesData && addressIssuesData.message}
-      domain
+      {addressIssuesData && (
+        <ErrorMessage>{addressIssuesData.message}</ErrorMessage>
+      )}
+      Domain
       <StyledTextInput
         placeholder="domain"
         value={domain}
         onChange={(e) => setDomain(e.target.value)}
       />
       <ImageUpload path={path} setPath={setPath} />
-      <button disabled={submittingDisabled} onClick={submitCDN}>
-        Submit -{' '}
-        {countsData &&
-          formatEther(
-            countsData.CDN.deposits.arbitrationCost +
-              countsData.CDN.deposits.submissionBaseDeposit
-          )}{' '}
-        xDAI
-      </button>
-    </div>
+      <Buttons>
+        <ReturnButton />
+        <SubmitButton disabled={submittingDisabled} onClick={submitCDN}>
+          Submit -{' '}
+          {countsData &&
+            formatEther(
+              countsData.CDN.deposits.arbitrationCost +
+                countsData.CDN.deposits.submissionBaseDeposit
+            )}{' '}
+          xDAI
+        </SubmitButton>
+      </Buttons>
+    </AddContainer>
   )
 }
 

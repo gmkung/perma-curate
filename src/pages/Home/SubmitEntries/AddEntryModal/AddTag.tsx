@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import styled, { css } from 'styled-components'
-import { landscapeStyle } from 'styles/landscapeStyle'
 import { useQuery } from '@tanstack/react-query'
 import RichAddressForm, { NetworkOption } from './RichAddressForm'
 import getAddressValidationIssue from 'utils/validateAddress'
@@ -9,39 +7,14 @@ import { initiateTransactionToCurate } from 'utils/initiateTransactionToCurate'
 import { fetchItemCounts } from 'utils/itemCounts'
 import { DepositParams } from 'utils/fetchRegistryDeposits'
 import { formatEther } from 'ethers'
-
-export const StyledWholeField = styled.div`
-  display: flex;
-  flex-direction: column;
-`
-
-const StyledTextInput = styled.input`
-  display: flex;
-  padding: 12px;
-  outline: none;
-  border: 2px solid #805ad5;
-  border-left: 0;
-  color: #2d3748;
-  border-radius: 12px;
-  border-radius: 0 12px 12px 12px;
-  font-family: 'Oxanium', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  ::placeholder {
-    font-family: 'Oxanium', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: #c7c7c7;
-  }
-
-  ${landscapeStyle(
-    () => css`
-      width: 100%;
-      padding-left: 24px;
-      border-radius: 0 12px 12px 0;
-    `
-  )}
-`
+import {
+  AddContainer,
+  Buttons,
+  ErrorMessage,
+  ReturnButton,
+  StyledTextInput,
+  SubmitButton,
+} from '.'
 
 const columns = [
   {
@@ -141,7 +114,7 @@ const AddAddressTag: React.FC = () => {
     !!addressIssuesLoading
 
   return (
-    <div>
+    <AddContainer>
       <h2>Submit Address Tag</h2>
       <RichAddressForm
         networkOption={network}
@@ -151,41 +124,46 @@ const AddAddressTag: React.FC = () => {
         registry="Tags"
       />
       {addressIssuesLoading && 'Loading'}
-      {addressIssuesData && addressIssuesData.message}
-      project name
+      {addressIssuesData && (
+        <ErrorMessage>{addressIssuesData.message}</ErrorMessage>
+      )}
+      Project name
       <StyledTextInput
         placeholder="project name"
         value={projectName}
         onChange={(e) => setProjectName(e.target.value)}
       />
-      contract name
+      Contract name
       <StyledTextInput
         placeholder="contract name"
         value={contractName}
         onChange={(e) => setContractName(e.target.value)}
       />
-      public note
+      Public note
       <StyledTextInput
         placeholder="public note"
         value={publicNote}
         onChange={(e) => setPublicNote(e.target.value)}
       />
-      ui/website link
+      UI/Website link
       <StyledTextInput
         placeholder="ui/website link"
         value={website}
         onChange={(e) => setWebsite(e.target.value)}
       />
-      <button disabled={submittingDisabled} onClick={submitAddressTag}>
-        Submit -{' '}
-        {countsData &&
-          formatEther(
-            countsData.Tags.deposits.arbitrationCost +
-              countsData.Tags.deposits.submissionBaseDeposit
-          )}{' '}
-        xDAI
-      </button>
-    </div>
+      <Buttons>
+        <ReturnButton />
+        <SubmitButton disabled={submittingDisabled} onClick={submitAddressTag}>
+          Submit -{' '}
+          {countsData &&
+            formatEther(
+              countsData.Tags.deposits.arbitrationCost +
+                countsData.Tags.deposits.submissionBaseDeposit
+            )}{' '}
+          xDAI
+        </SubmitButton>
+      </Buttons>
+    </AddContainer>
   )
 }
 

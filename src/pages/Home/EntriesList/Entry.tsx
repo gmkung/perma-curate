@@ -7,7 +7,7 @@ import { useSearchParams } from 'react-router-dom'
 import { formatEther } from 'ethers'
 
 const Card = styled.div`
-  background-color: #380c65;
+  background-color: #380C65;
   border-radius: 12px;
   color: white;
   font-family: 'Oxanium', sans-serif;
@@ -16,6 +16,7 @@ const Card = styled.div`
   transition: transform 150ms ease-in-out, box-shadow 150ms ease-in-out;
   &:hover {
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
   }
   &:active {
     transform: scale(0.95);
@@ -59,7 +60,7 @@ const CardContent = styled.div`
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
   padding: 8px;
   padding-bottom: 16px;
 `
@@ -140,14 +141,14 @@ const Entry: React.FC<IEntry> = ({ item }) => {
           <AddressDisplay address={item.key0} />
         </strong>
         {item.registryAddress === registryMap['Tags'] && (
-          <div>
+          <>
             <div>{item.key2}</div>
             <div>{item.key1}</div>
             <div>{item.key3}</div>
-          </div>
+          </>
         )}
         {item.registryAddress === registryMap['Tokens'] && (
-          <div>
+          <>
             {item.props && item.props.find((prop) => prop.label === 'Logo') && (
               <div>
                 <Image
@@ -162,12 +163,12 @@ const Entry: React.FC<IEntry> = ({ item }) => {
             )}
             <div>{item.key2}</div>
             <div>{item.key1}</div>
-          </div>
+          </>
         )}
         {item.registryAddress === registryMap['CDN'] && (
-          <div>
+          <>
             <div>{item.key1}</div>
-          </div>
+          </>
         )}
       </CardContent>
     </Card>

@@ -1,9 +1,11 @@
-import { useQuery } from '@tanstack/react-query'
 import React, { useEffect, useMemo } from 'react'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
 import { useSearchParams, createSearchParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { fetchItems } from 'utils/fetchItems'
+import { fetchItemCounts } from 'utils/itemCounts'
 import Header from './Header'
-import styled from 'styled-components'
 import RegistryDetails from './RegistryDetails'
 import SubmitEntries from './SubmitEntries'
 import Search from './Search'
@@ -11,10 +13,8 @@ import LoadingItems from './LoadingItems'
 import EntriesList from './EntriesList'
 import Footer from 'components/Footer'
 import Pagination from './Pagination'
-import { fetchItemCounts } from 'utils/itemCounts'
 import DetailsModal from './DetailsModal'
 import RegistryDetailsModal from './RegistryDetails/RegistryDetailsModal'
-import { calcMinMax } from 'utils/calcMinMax'
 import Filters from './Filters'
 import AddEntryModal from './SubmitEntries/AddEntryModal'
 
@@ -34,9 +34,16 @@ const RegistryDetailsAndSubmitContainer = styled.div`
   align-items: center;
   background: #5a2393;
   color: white;
-  width: 80%;
-  margin-bottom: ${calcMinMax(8, 12)};
+  width: 84vw;
+  margin-bottom: 12px;
   gap: 12px;
+  flex-wrap: wrap;
+
+  ${landscapeStyle(
+    () => css`
+      width: 80%;
+    `
+  )}
 `
 
 export const ITEMS_PER_PAGE = 20

@@ -6,12 +6,12 @@ import LearnMore from './LearnMore'
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-left: 12px;
+  gap: 20px;
 
   ${landscapeStyle(
     () => css`
       flex-direction: row;
+      align-items: center;
     `
   )}
 `

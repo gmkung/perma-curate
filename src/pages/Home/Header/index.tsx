@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
+import { responsiveSize } from 'styles/responsiveSize'
 import Title from './Title'
-import { calcMinMax } from 'utils/calcMinMax'
 
 const Container = styled.div`
   display: flex;
@@ -14,7 +14,7 @@ const StyledText = styled.text`
   font-family: 'Orbitron', sans-serif;
   text-align: center;
   color: #d6d6d6;
-  margin-bottom: ${calcMinMax(12, 16)};
+  margin-bottom: ${responsiveSize(12, 16)};
 `
 
 const Header: React.FC = () => {

@@ -1,6 +1,4 @@
 import React, { useState } from 'react'
-import styled, { css } from 'styled-components'
-import { landscapeStyle } from 'styles/landscapeStyle'
 import { useQuery } from '@tanstack/react-query'
 import RichAddressForm, { NetworkOption } from './RichAddressForm'
 import getAddressValidationIssue from 'utils/validateAddress'
@@ -10,39 +8,14 @@ import { fetchItemCounts } from 'utils/itemCounts'
 import { initiateTransactionToCurate } from 'utils/initiateTransactionToCurate'
 import { DepositParams } from 'utils/fetchRegistryDeposits'
 import { formatEther } from 'ethers'
-
-export const StyledWholeField = styled.div`
-  display: flex;
-  flex-direction: column;
-`
-
-const StyledTextInput = styled.input`
-  display: flex;
-  padding: 12px;
-  outline: none;
-  border: 2px solid #805ad5;
-  border-left: 0;
-  color: #2d3748;
-  border-radius: 12px;
-  border-radius: 0 12px 12px 12px;
-  font-family: 'Oxanium', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  ::placeholder {
-    font-family: 'Oxanium', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: #c7c7c7;
-  }
-
-  ${landscapeStyle(
-    () => css`
-      width: 100%;
-      padding-left: 24px;
-      border-radius: 0 12px 12px 0;
-    `
-  )}
-`
+import {
+  AddContainer,
+  Buttons,
+  ErrorMessage,
+  ReturnButton,
+  StyledTextInput,
+  SubmitButton,
+} from '.'
 
 const columns = [
   {
@@ -139,7 +112,7 @@ const AddToken: React.FC = () => {
     !path
 
   return (
-    <div>
+    <AddContainer>
       <h2>Submit Token</h2>
       <RichAddressForm
         networkOption={network}
@@ -148,37 +121,42 @@ const AddToken: React.FC = () => {
         setAddress={setAddress}
         registry="Tags"
       />
-      {addressIssuesLoading && 'Loading'}
-      {addressIssuesData && addressIssuesData.message}
-      decimals
+      {addressIssuesLoading && 'Loading...'}
+      {addressIssuesData && (
+        <ErrorMessage>{addressIssuesData.message}</ErrorMessage>
+      )}
+      Decimals
       <StyledTextInput
         placeholder="decimals"
         value={decimals}
         onChange={(e) => setDecimals(e.target.value)}
       />
-      name
+      Name
       <StyledTextInput
         placeholder="name"
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      symbol
+      Symbol
       <StyledTextInput
         placeholder="symbol"
         value={symbol}
         onChange={(e) => setSymbol(e.target.value)}
       />
       <ImageUpload path={path} setPath={setPath} />
-      <button disabled={submittingDisabled} onClick={submitToken}>
-        Submit -{' '}
-        {countsData &&
-          formatEther(
-            countsData.Tokens.deposits.arbitrationCost +
-              countsData.Tokens.deposits.submissionBaseDeposit
-          )}{' '}
-        xDAI
-      </button>
-    </div>
+      <Buttons>
+        <ReturnButton />
+        <SubmitButton disabled={submittingDisabled} onClick={submitToken}>
+          Submit -{' '}
+          {countsData &&
+            formatEther(
+              countsData.Tokens.deposits.arbitrationCost +
+                countsData.Tokens.deposits.submissionBaseDeposit
+            )}{' '}
+          xDAI
+        </SubmitButton>
+      </Buttons>
+    </AddContainer>
   )
 }
 

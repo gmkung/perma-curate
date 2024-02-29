@@ -1,5 +1,7 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
+import { responsiveSize } from 'styles/responsiveSize'
 import { useSearchParams } from 'react-router-dom'
 
 const Container = styled.div`
@@ -7,10 +9,17 @@ const Container = styled.div`
   flex-direction: row;
   border-radius: 12px;
   background: #380c65;
-  padding: 21px 10px;
+  padding: 21px ${responsiveSize(16, 32)};
+  justify-content: space-between;
   cursor: pointer;
   box-sizing: border-box;
-  width: 40%;
+  gap: 20px;
+
+  ${landscapeStyle(
+    () => css`
+      width: 33%;
+    `
+  )}
 `
 
 const Header = styled.div`
@@ -28,17 +37,15 @@ const TextContainer = styled.div`
   font-family: 'Orbitron', sans-serif;
   color: white;
   gap: 12px;
-  padding-left: 20px;
 `
 
 const View = styled.a`
   font-size: 16px;
+  font-weight: 700;
   font-family: 'Orbitron', sans-serif;
   color: #9c46ff;
   text-decoration: underline;
   margin-top: 4px;
-  padding-left: 20px;
-  padding-right: 10px;
 `
 
 const RegistryDetails: React.FC = () => {

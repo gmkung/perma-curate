@@ -1,9 +1,11 @@
 import React, { useMemo, useRef } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
+import { responsiveSize } from 'styles/responsiveSize'
 import { useSearchParams } from 'react-router-dom'
-import { useFocusOutside } from 'hooks/useFocusOutside'
 import { useQuery } from '@tanstack/react-query'
-import { FocusedRegistry, fetchItemCounts } from '~src/utils/itemCounts'
+import { FocusedRegistry, fetchItemCounts } from 'utils/itemCounts'
+import { useFocusOutside } from 'hooks/useFocusOutside'
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -19,30 +21,46 @@ const ModalOverlay = styled.div`
 `
 
 const ModalContainer = styled.div`
-  background-color: #984ae1;
-  border-radius: 12px;
-  width: 75%;
-  height: 75%;
-  position: relative;
-  color: #4a5568;
   display: flex;
+  background-color: #5a2393;
+  border-radius: 12px;
+  width: 84vw;
   flex-direction: column;
-  overflow-y: hidden;
   align-items: center;
-`
+  justify-content: center;
+  gap: 24px;
+  padding-top: 24px;
+  padding-bottom: 24px;
 
-const CloseButton = styled.button`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 10;
+  ${landscapeStyle(
+    () => css`
+      width: 65%;
+    `
+  )}
 `
 
 const StyledLabel = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
   font-size: 20px;
   font-family: 'Orbitron', sans-serif;
   font-weight: bold;
-  color: black;
+  color: #fff;
+  padding: 0 ${responsiveSize(16, 32)};
+`
+
+const StyledA = styled.a`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  word-break: break-word;
+  color: #add8e6;
+`
+
+const StyledImg = styled.img`
+  height: 200px;
+  width: 200px;
 `
 
 const RegistryDetailsModal: React.FC = () => {
@@ -77,40 +95,32 @@ const RegistryDetailsModal: React.FC = () => {
 
   return (
     <ModalOverlay>
-      <ModalContainer ref={containerRef}>
-        {registry && (
-          <>
-            <StyledLabel>Title: {registry.metadata.tcrTitle}</StyledLabel>
-            <StyledLabel>
-              Address:{' '}
-              <a
-                href={`https://gnosisscan.io/address/${registry.metadata.address}`}
-              >
-                {registry.metadata.address}
-              </a>
-            </StyledLabel>
-            <StyledLabel>
-              Policy:{' '}
-              <a href={`https://ipfs.kleros.io${registry.metadata.policyURI}`}>
-                Link
-              </a>
-            </StyledLabel>
-            <img
-              style={{ marginTop: 50 }}
-              height={300}
-              src={`https://ipfs.kleros.io${registry.metadata.logoURI}`}
-            ></img>
-          </>
-        )}
-
-        <CloseButton
-          onClick={() => {
-            closeModal()
-          }}
-        >
-          X
-        </CloseButton>
-      </ModalContainer>
+      {registry && (
+        <ModalContainer ref={containerRef}>
+          <StyledLabel>Title: {registry.metadata.tcrTitle}</StyledLabel>
+          <StyledLabel>
+            Address:{' '}
+            <StyledA
+              href={`https://gnosisscan.io/address/${registry.metadata.address}`}
+              target="_blank"
+            >
+              {registry.metadata.address}
+            </StyledA>
+          </StyledLabel>
+          <StyledLabel>
+            Policy:{' '}
+            <StyledA
+              href={`https://ipfs.kleros.io${registry.metadata.policyURI}`}
+              target="_blank"
+            >
+              Link
+            </StyledA>
+          </StyledLabel>
+          <StyledImg
+            src={`https://ipfs.kleros.io${registry.metadata.logoURI}`}
+          ></StyledImg>
+        </ModalContainer>
+      )}
     </ModalOverlay>
   )
 }

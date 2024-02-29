@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { useDebounce } from 'react-use'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
-import { calcMinMax } from 'utils/calcMinMax'
+import { responsiveSize } from 'styles/responsiveSize'
+import { useSearchParams } from 'react-router-dom'
+import { useDebounce } from 'react-use'
 
 const Container = styled.div`
   display: flex;
   width: 84vw;
-  margin-bottom: ${calcMinMax(4, 8)};
+  margin-bottom: ${responsiveSize(4, 8)};
   flex-direction: column;
 
   ${landscapeStyle(
@@ -26,7 +26,7 @@ const StyledLabel = styled.label`
   font-family: 'Orbitron', sans-serif;
   font-weight: bold;
   font-size: 20px;
-  padding: 16px 32px;
+  padding: ${responsiveSize(8, 16)} ${responsiveSize(16, 32)};
   border-radius: 12px 12px 0 0;
   color: white;
 
@@ -39,7 +39,8 @@ const StyledLabel = styled.label`
 
 const StyledInput = styled.input`
   display: flex;
-  padding: 12px;
+  padding: ${responsiveSize(8, 12)};
+  padding-left: ${responsiveSize(16, 24)};
   outline: none;
   border: 2px solid #805ad5;
   border-left: 0;
@@ -59,7 +60,6 @@ const StyledInput = styled.input`
   ${landscapeStyle(
     () => css`
       width: 100%;
-      padding-left: 24px;
       border-radius: 0 12px 12px 0;
     `
   )}
@@ -103,7 +103,7 @@ const Search: React.FC = () => {
     setAppliedSearch(false)
     setSearchTerm(text)
   }
-  
+
   return (
     <Container>
       <StyledLabel>Search</StyledLabel>

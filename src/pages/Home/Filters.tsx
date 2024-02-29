@@ -1,11 +1,11 @@
 import React, { useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import styled, { css } from 'styled-components'
+import { responsiveSize } from 'styles/responsiveSize'
 import { landscapeStyle } from 'styles/landscapeStyle'
-import { calcMinMax } from 'utils/calcMinMax'
+import { relevantNetworks } from 'utils/fetchItems'
 import DownDirectionIcon from 'tsx:svgs/icons/down-direction.svg'
 import { useFocusOutside } from 'hooks/useFocusOutside'
-import { relevantNetworks } from 'utils/fetchItems'
 
 const FilterContainer = styled.div`
   padding: 4px;
@@ -342,7 +342,7 @@ const Ordering: React.FC = () => {
 const Container = styled.div`
   display: flex;
   width: 84vw;
-  margin-bottom: ${calcMinMax(4, 8)};
+  margin-bottom: ${responsiveSize(4, 8)};
   flex-direction: column;
 
   ${landscapeStyle(

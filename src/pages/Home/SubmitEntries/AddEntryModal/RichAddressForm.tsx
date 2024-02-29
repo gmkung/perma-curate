@@ -1,19 +1,20 @@
 import React, { SetStateAction, Dispatch } from 'react'
 import Select from 'react-select'
 import styled, { css } from 'styled-components'
-import { StyledWholeField } from './AddTag'
+import { StyledWholeField } from '.'
 import { landscapeStyle } from '~src/styles/landscapeStyle'
 import { relevantNetworks } from 'utils/fetchItems'
 
 const StyledAddressDiv = styled.div`
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
 `
 
 const StyledNetworkSelect = styled(Select)`
   font-weight: bold;
   color: black;
-  width: 30%;
+  width: 200px;
 `
 
 const StyledAddressInput = styled.input`
