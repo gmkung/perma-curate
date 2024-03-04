@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
-import Button from 'components/Button'
 import { useSearchParams } from 'react-router-dom'
+import Button from 'components/Button'
 
 const Container = styled.div`
   display: flex;
@@ -28,16 +28,27 @@ const PageControls = styled.div`
 `
 
 const Input = styled.input`
-  width: 64px;
+  display: flex;
+  width: 36px;
+  color: #fff;
+  background: #855caf;
   padding: 8px;
-  border-radius: 8px 0 0 8px;
+  border-radius: 8px;
+  border: none;
   outline: none;
-  border: 2px solid #805ad5;
-  color: #2d3748;
+  ::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    -moz-appearance: textfield;
+  }
 `
 
 const Span = styled.span`
   color: white;
+`
+
+const StyledButton = styled(Button)`
+  font-size: 16px;
 `
 
 interface IPagination {
@@ -65,13 +76,13 @@ const Pagination: React.FC<IPagination> = ({ totalPages }) => {
   }
   return (
     <Container>
-      <Button
+      <StyledButton
         onClick={() => setCurrentPage(page - 1)}
         disabled={page <= 1}
         style={{ cursor: page <= 1 ? 'not-allowed' : 'pointer' }}
       >
         Previous
-      </Button>
+      </StyledButton>
       <PageControls>
         <Input
           type="number"
@@ -89,9 +100,11 @@ const Pagination: React.FC<IPagination> = ({ totalPages }) => {
           }}
         />
         <Span>of {totalPages === null ? '???' : totalPages}</Span>
-        <Button onClick={() => setCurrentPage(pageInput)}>Go</Button>
+        <StyledButton onClick={() => setCurrentPage(pageInput)}>
+          Go
+        </StyledButton>
       </PageControls>
-      <Button
+      <StyledButton
         onClick={() => setCurrentPage(page + 1)}
         disabled={page >= (totalPages || Infinity)}
         style={{
@@ -99,7 +112,7 @@ const Pagination: React.FC<IPagination> = ({ totalPages }) => {
         }}
       >
         Next
-      </Button>
+      </StyledButton>
     </Container>
   )
 }

@@ -1,74 +1,51 @@
 import React, { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { useDebounce } from 'react-use'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
-import { calcMinMax } from 'utils/calcMinMax'
+import { responsiveSize } from 'styles/responsiveSize'
+import { useDebounce } from 'react-use'
+import { useSearchParams } from 'react-router-dom'
+import SearchIcon from 'tsx:svgs/icons/search.svg'
 
 const Container = styled.div`
   display: flex;
-  width: 84vw;
-  margin-bottom: ${calcMinMax(16, 24)};
-  flex-direction: column;
+  align-items: center;
+  background: #855caf;
+  border-radius: 12px;
+  padding-left: ${responsiveSize(12, 20)};
+  width: 100%;
 
   ${landscapeStyle(
     () => css`
-      width: 80%;
-      flex-direction: row;
+      width: 560px;
     `
   )}
-`
 
-const StyledLabel = styled.label`
-  display: flex;
-  max-width: 80px;
-  background-color: #883ae1;
-  font-family: 'Orbitron', sans-serif;
-  font-weight: bold;
-  font-size: 20px;
-  padding: 16px 32px;
-  border-radius: 12px 12px 0 0;
-  color: white;
-
-  ${landscapeStyle(
-    () => css`
-      border-radius: 12px 0 0 12px;
-    `
-  )}
+  svg {
+    flex-shrink: 0;
+  }
 `
 
 const StyledInput = styled.input`
-  display: flex;
-  padding: 12px;
-  outline: none;
-  border: 2px solid #805ad5;
-  border-left: 0;
-  color: #2d3748;
-  border-radius: 12px;
-  border-radius: 0 12px 12px 12px;
-  font-family: 'Orbitron', sans-serif;
-  font-size: 20px;
+  flex-grow: 1;
+  padding: 8px;
+  background: transparent;
+  font-family: 'Oxanium', sans-serif;
   font-weight: 700;
-  ::placeholder {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: #c7c7c7;
-  }
+  font-size: 18px;
+  outline: none;
+  border: none;
+  color: #fff;
+  border-radius: 12px;
 
-  ${landscapeStyle(
-    () => css`
-      width: 100%;
-      padding-left: 24px;
-      border-radius: 0 12px 12px 0;
-    `
-  )}
+  ::placeholder {
+    font-weight: 700;
+    color: #cd9dff;
+  }
 `
 
 const Search: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [searchTerm, setSearchTerm] = useState<string>('')
-  // prevent rebouncing if search was already applied
   const [appliedSearch, setAppliedSearch] = useState<boolean>(true)
 
   useEffect(() => {
@@ -91,6 +68,7 @@ const Search: React.FC = () => {
       setAppliedSearch(true)
     }
   }
+
   useDebounce(
     () => {
       applySearch()
@@ -103,15 +81,15 @@ const Search: React.FC = () => {
     setAppliedSearch(false)
     setSearchTerm(text)
   }
-  
+
   return (
     <Container>
-      <StyledLabel>Search</StyledLabel>
+      <SearchIcon />
       <StyledInput
         type="text"
         value={searchTerm}
         onChange={(e) => changeSearchTerm(e.target.value)}
-        placeholder="Enter keywords, Ethereum address, etc..."
+        placeholder="Search with keywords, ethereum address, etc."
       />
     </Container>
   )

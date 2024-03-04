@@ -1,19 +1,22 @@
-import { useQuery } from '@tanstack/react-query'
 import React, { useEffect, useMemo } from 'react'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
+import { responsiveSize } from 'styles/responsiveSize'
 import { useSearchParams, createSearchParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { fetchItems } from 'utils/fetchItems'
-import Header from './Header'
-import styled from 'styled-components'
+import { fetchItemCounts } from 'utils/itemCounts'
+import Navbar from './Navbar'
 import RegistryDetails from './RegistryDetails'
-import SubmitEntries from './SubmitEntries'
+import SubmitButton from './SubmitButton'
 import Search from './Search'
 import LoadingItems from './LoadingItems'
 import EntriesList from './EntriesList'
-import Footer from 'components/Footer'
 import Pagination from './Pagination'
-import { fetchItemCounts } from 'utils/itemCounts'
 import DetailsModal from './DetailsModal'
+import RegistryDetailsModal from './RegistryDetails/RegistryDetailsModal'
 import Filters from './Filters'
+import AddEntryModal from './SubmitEntries/AddEntryModal'
 
 const Container = styled.div`
   display: flex;
@@ -22,7 +25,41 @@ const Container = styled.div`
   background: #5a2393;
   min-height: 100vh;
   color: white;
-  padding: 32px;
+  padding-bottom: 48px;
+`
+
+const SearchAndRegistryDetailsAndSubmitContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  background: #5a2393;
+  color: white;
+  width: 84vw;
+  margin-bottom: ${responsiveSize(24, 24)};
+  gap: 16px;
+  flex-wrap: wrap;
+
+  ${landscapeStyle(
+    () => css`
+      width: 80%;
+    `
+  )}
+`
+
+const RegistryDetailsAndSubmitContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+
+  ${landscapeStyle(
+    () => css`
+      width: auto;
+    `
+  )}
 `
 
 export const ITEMS_PER_PAGE = 20
@@ -48,6 +85,16 @@ const Home: React.FC = () => {
     [searchParams]
   )
 
+  const isRegistryDetailsModalOpen = useMemo(
+    () => !!searchParams.get('registrydetails'),
+    [searchParams]
+  )
+
+  const isAddItemOpen = useMemo(
+    () => !!searchParams.get('additem'),
+    [searchParams]
+  )
+
   const {
     isLoading: searchLoading,
     error: searchError,
@@ -61,8 +108,9 @@ const Home: React.FC = () => {
     error: countsError,
     data: countsData,
   } = useQuery({
-    queryKey: ['counts', ...searchQueryKeys],
+    queryKey: ['counts'],
     queryFn: () => fetchItemCounts(),
+    staleTime: Infinity,
   })
 
   const currentItemCount = useMemo(() => {
@@ -77,13 +125,12 @@ const Home: React.FC = () => {
       registry.length === 0 ||
       status.length === 0 ||
       disputed.length === 0 ||
-      network.length === 0 ||
       page === null ||
       !countsData
     ) {
       // defaults or counts unloaded yet
       return undefined
-    } else if (!text && network.length === 4) {
+    } else if (!text && network.length === 0) {
       // can use the subgraph category counts.
       const getCount = (registry: 'Tags' | 'Tokens' | 'CDN') => {
         return (
@@ -131,7 +178,6 @@ const Home: React.FC = () => {
     const registry = searchParams.getAll('registry')
     const status = searchParams.getAll('status')
     const disputed = searchParams.getAll('disputed')
-    const network = searchParams.getAll('network')
     const text = searchParams.get('text')
     const page = searchParams.get('page')
     const orderDirection = searchParams.get('orderDirection')
@@ -139,7 +185,6 @@ const Home: React.FC = () => {
       registry.length === 0 ||
       status.length === 0 ||
       disputed.length === 0 ||
-      network.length === 0 ||
       orderDirection === null ||
       page === null
     ) {
@@ -150,7 +195,6 @@ const Home: React.FC = () => {
             ? ['Registered', 'RegistrationRequested', 'ClearingRequested']
             : status,
         disputed: disputed.length === 0 ? ['true', 'false'] : disputed,
-        network: network.length === 0 ? ['1', '100', '137', '56'] : network,
         text: text === null ? '' : text,
         page: page === null ? '1' : page,
         orderDirection: orderDirection === null ? 'desc' : orderDirection,
@@ -166,17 +210,15 @@ const Home: React.FC = () => {
 
   return (
     <Container>
-      <Header />
-      <RegistryDetails
-        loading={searchLoading}
-        itemCount={
-          currentItemCount === null || currentItemCount === undefined
-            ? null
-            : currentItemCount
-        }
-      />
-      <SubmitEntries />
-      <Search />
+      <Navbar />
+      <SearchAndRegistryDetailsAndSubmitContainer>
+        <Search />
+        <RegistryDetailsAndSubmitContainer>
+          <RegistryDetails />
+          <SubmitButton />
+        </RegistryDetailsAndSubmitContainer>
+      </SearchAndRegistryDetailsAndSubmitContainer>
+
       <Filters />
 
       {searchLoading || !searchData ? (
@@ -185,9 +227,10 @@ const Home: React.FC = () => {
         <EntriesList searchData={searchData} />
       )}
       <Pagination totalPages={totalPages} />
-      <Footer />
 
       {isDetailsModalOpen && <DetailsModal />}
+      {isRegistryDetailsModalOpen && <RegistryDetailsModal />}
+      {isAddItemOpen && <AddEntryModal />}
     </Container>
   )
 }

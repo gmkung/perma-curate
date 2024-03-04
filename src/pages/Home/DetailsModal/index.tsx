@@ -1,22 +1,23 @@
 import React, { useMemo, useRef, useState } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
+import { landscapeStyle } from 'styles/landscapeStyle'
+import { responsiveSize } from 'styles/responsiveSize'
 import ReactMarkdown from 'react-markdown'
+import { useSearchParams } from 'react-router-dom'
+import { formatEther } from 'ethers'
+import { useFocusOutside } from 'hooks/useFocusOutside'
+import { useQuery } from '@tanstack/react-query'
 import { renderValue } from 'utils/renderValue'
 import { statusColorMap } from 'utils/colorMappings'
-import { performEvidenceBasedRequest } from 'utils/performEvidenceBasedRequest'
-import { useSearchParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { fetchItemDetails } from 'utils/itemDetails'
-import LoadingItems from './LoadingItems'
-import { useFocusOutside } from 'hooks/useFocusOutside'
-import {
-  DepositParams,
-  fetchRegistryDeposits,
-} from 'utils/fetchRegistryDeposits'
 import { fetchArbitrationCost } from 'utils/fetchArbitrationCost'
-import { formatEther } from 'ethers'
+import { fetchItemCounts } from 'utils/itemCounts'
+import { revRegistryMap } from 'utils/fetchItems'
+import { fetchItemDetails } from 'utils/itemDetails'
+import LoadingItems from '../LoadingItems'
+import ConfirmationBox from './ConfirmationBox'
+import { SubmitButton } from '../SubmitEntries/AddEntryModal'
 
-const ModalOverlay = styled.div`
+export const ModalOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
@@ -26,86 +27,69 @@ const ModalOverlay = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 50;
+  z-index: 0;
 `
 
 const ModalContainer = styled.div`
-  background-color: white;
+  display: flex;
+  background-color: #5a2393;
   border-radius: 12px;
-  width: 75%;
-  height: 75%;
+  width: 84vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  color: #fff;
+  flex-direction: column;
+  flex-wrap: wrap;
   position: relative;
-  color: #4a5568;
-  display: flex;
-  flex-direction: column;
-  overflow-y: hidden;
+
+  ${landscapeStyle(
+    () => css`
+      width: 75%;
+    `
+  )}
 `
 
-const CloseButton = styled.button`
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 10;
-`
-
-const ConfirmationBox = styled.div`
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 75%;
-  background-color: #f7fafc;
-  border-radius: 12px;
-  padding: 24px;
-  color: #4a5568;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-`
-
-const ConfirmationTitle = styled.h3``
-
-const TextArea = styled.textarea`
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-`
-
-const ButtonGroup = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-`
-
-const ActionButton = styled.button<{ isConfirm: boolean }>`
-  padding: 8px 16px;
-  border-radius: 4px;
-  ${({ isConfirm }) =>
-    isConfirm
-      ? 'background-color: #3182ce; color: white;'
-      : 'border: 1px solid #e2e8f0;'}
+const EntryDetailsHeader = styled.h1`
+  margin: 0;
 `
 
 const StatusButton = styled.button<{ status: string }>`
-  position: absolute;
-  top: 8px;
-  right: 64px;
-  z-index: 10;
-  border-radius: 9999px;
-  padding: 8px 16px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: #3182ce;
+  color: white;
+  padding: 12px 24px;
+  font-family: 'Oxanium', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: #6f42c1;
+  }
+
+  &:disabled {
+    background-color: #c7c7c7;
+    cursor: not-allowed;
+  }
+
   ${({ status }) =>
     status === 'Registered'
       ? 'background-color: #ed8936; color: white;'
       : status === 'RegistrationRequested'
       ? 'background-color: #f56565; color: white;'
       : 'background-color: #f56565; color: white;'}
+
+  ${landscapeStyle(
+    () => css`
+      padding: 12px 48px;
+    `
+  )}
 `
 
 const DetailsContent = styled.div`
-  padding: 32px;
-  overflow-y: auto;
+  padding: ${responsiveSize(16, 24)};
   flex-grow: 1;
 `
 
@@ -114,48 +98,56 @@ const EvidenceSection = styled.div`
 `
 
 const StatusSpan = styled.span<{ status: string }>`
-  display: inline-block;
+  display: flex;
+  width: 180px;
   padding: 4px 8px;
   color: white;
   border-radius: 4px;
   background-color: ${({ status }) => statusColorMap[status]};
 `
-const EntryDetailsHeader = styled.h2`
+const Header = styled.div`
+  display: flex;
   font-size: 20px;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin: 0;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
 `
 
 const EntryDetailsContainer = styled.div`
-  padding: 16px;
+  display: flex;
+  padding: 20px 0;
+  flex-direction: column;
   margin-bottom: 16px;
   border-bottom: 2px solid #edf2f7;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  img {
+    width: 150px !important;
+    height: 150px !important;
+  }
 `
+
 const EvidenceSectionHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
 `
 
 const EvidenceHeader = styled.h2`
   font-size: 1.25rem; // 20px
-  margin-bottom: 16px;
-`
-
-const SubmitEvidenceButton = styled.button`
-  background-color: #3182ce;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  &:hover {
-    background-color: #2b6cb0;
-  }
+  margin: 0;
 `
 
 const Evidence = styled.div`
   padding: 12px;
-  background-color: #f7fafc;
   border-radius: 4px;
+  border: 1px solid #edf2f7;
   font-family: serif;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;
@@ -184,8 +176,6 @@ const DetailsModal: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
   const [evidenceConfirmationType, setEvidenceConfirmationType] = useState('')
-  const [evidenceTitle, setEvidenceTitle] = useState('')
-  const [evidenceText, setEvidenceText] = useState('')
 
   const itemDetailsId = useMemo(
     () => searchParams.get('itemdetails'),
@@ -199,6 +189,7 @@ const DetailsModal: React.FC = () => {
   } = useQuery({
     queryKey: ['details', itemDetailsId || ''],
     queryFn: () => fetchItemDetails(itemDetailsId || ''),
+    staleTime: Infinity,
   })
 
   // the registry can be fetched directly from itemDetailsId.
@@ -207,13 +198,19 @@ const DetailsModal: React.FC = () => {
     : ''
 
   const {
-    isLoading: depositsLoading,
-    error: depositsError,
-    data: depositsData,
+    isLoading: countsLoading,
+    error: countsError,
+    data: countsData,
   } = useQuery({
-    queryKey: ['deposits', registryParsedFromItemId],
-    queryFn: () => fetchRegistryDeposits(registryParsedFromItemId),
+    queryKey: ['counts'],
+    queryFn: () => fetchItemCounts(),
+    staleTime: Infinity,
   })
+
+  const deposits = useMemo(() => {
+    if (!countsData) return undefined
+    return countsData[revRegistryMap[registryParsedFromItemId]].deposits
+  }, [countsData, registryParsedFromItemId])
 
   // get arbitrationCost, keyed by arbitrator and arbitratorExtraData
   const {
@@ -231,6 +228,7 @@ const DetailsModal: React.FC = () => {
         detailsData?.requests?.[0].arbitrator || '',
         detailsData?.requests?.[0].arbitratorExtraData || ''
       ),
+    staleTime: Infinity,
   })
 
   const evidences = useMemo(() => {
@@ -247,119 +245,63 @@ const DetailsModal: React.FC = () => {
     })
     setIsConfirmationOpen(false)
   }
+  console.log(detailsData)
+
   const containerRef = useRef(null)
   useFocusOutside(containerRef, () => closeModal())
 
   const formattedDepositCost = useMemo(() => {
-    if (!detailsData || !depositsData || !arbitrationCostData) return '??? xDAI'
+    if (!detailsData || !deposits || arbitrationCostData === undefined)
+      return '??? xDAI'
     let sum = 0n
     if (detailsData.status === 'Registered') {
-      sum = arbitrationCostData + depositsData.removalBaseDeposit
+      sum = arbitrationCostData + deposits.removalBaseDeposit
     } else if (detailsData.status === 'RegistrationRequested') {
-      sum = arbitrationCostData + depositsData.submissionChallengeBaseDeposit
+      sum = arbitrationCostData + deposits.submissionChallengeBaseDeposit
     } else if (detailsData.status === 'ClearingRequested') {
-      sum = arbitrationCostData + depositsData.removalChallengeBaseDeposit
+      sum = arbitrationCostData + deposits.removalChallengeBaseDeposit
     }
     return `${Number(formatEther(sum))} xDAI`
-  }, [detailsData, depositsData, arbitrationCostData])
+  }, [detailsData, deposits, arbitrationCostData])
 
   return (
     <ModalOverlay>
       <ModalContainer ref={containerRef}>
-        <CloseButton
-          onClick={() => {
-            closeModal()
-          }}
-        >
-          X
-        </CloseButton>
-
         {detailsLoading || !detailsData ? (
           <LoadingItems />
         ) : (
           <>
-            {/* Confirmation Box */}
+            {/* ConfirmationBox Modal */}
             {isConfirmationOpen && (
-              <ConfirmationBox>
-                <ConfirmationTitle>
-                  {(() => {
-                    switch (evidenceConfirmationType) {
-                      case 'Evidence':
-                        return 'Enter the evidence message you want to submit'
-                      case 'RegistrationRequested':
-                        return 'Provide a reason for challenging this entry'
-                      case 'Registered':
-                        return 'Provide a reason for removing this entry'
-                      case 'ClearingRequested':
-                        return 'Provide a reason for challenging this removal request'
-                      default:
-                        return 'Default message'
-                    }
-                  })()}
-                </ConfirmationTitle>
-                <label>Message title</label>
-                <TextArea
-                  rows={1}
-                  value={evidenceTitle}
-                  onChange={(e) => setEvidenceTitle(e.target.value)}
-                ></TextArea>
-                <label>Evidence message</label>
-                <TextArea
-                  rows={3}
-                  value={evidenceText}
-                  onChange={(e) => setEvidenceText(e.target.value)}
-                ></TextArea>
-                <ButtonGroup>
-                  <ActionButton
-                    isConfirm={isConfirmationOpen}
-                    onClick={() => setIsConfirmationOpen(false)}
-                  >
-                    Cancel
-                  </ActionButton>
-                  <ActionButton
-                    isConfirm={isConfirmationOpen}
-                    onClick={async () => {
-                      let result = false // a flag to check if the function execution was successful
-                      result = await performEvidenceBasedRequest(
-                        detailsData,
-                        depositsData as DepositParams,
-                        arbitrationCostData as bigint,
-                        evidenceTitle,
-                        evidenceText,
-                        evidenceConfirmationType
-                      )
-
-                      // Check if the function was executed successfully
-                      if (result) {
-                        closeModal()
-                      }
-                    }}
-                  >
-                    Confirm
-                  </ActionButton>
-                </ButtonGroup>
-              </ConfirmationBox>
+              <ConfirmationBox
+                evidenceConfirmationType={evidenceConfirmationType}
+                isConfirmationOpen={isConfirmationOpen}
+                setIsConfirmationOpen={setIsConfirmationOpen}
+                detailsData={detailsData}
+                deposits={deposits}
+                arbitrationCostData={arbitrationCostData}
+              />
             )}
-
-            {/* Status-based Button */}
-            <StatusButton
-              onClick={() => {
-                setIsConfirmationOpen(true)
-                setEvidenceConfirmationType(detailsData.status)
-              }}
-              status={detailsData.status}
-            >
-              {detailsData.status === 'Registered' && `Remove entry`}
-              {detailsData.status === 'RegistrationRequested' &&
-                'Challenge registration'}
-              {detailsData.status === 'ClearingRequested' &&
-                'Challenge removal'}
-              {' — ' + formattedDepositCost}
-            </StatusButton>
 
             {/* DETAILS */}
             <DetailsContent>
-              <EntryDetailsHeader>Entry details</EntryDetailsHeader>
+              <Header>
+                <EntryDetailsHeader>Entry details</EntryDetailsHeader>
+                <StatusButton
+                  onClick={() => {
+                    setIsConfirmationOpen(true)
+                    setEvidenceConfirmationType(detailsData.status)
+                  }}
+                  status={detailsData.status}
+                >
+                  {detailsData.status === 'Registered' && `Remove entry`}
+                  {detailsData.status === 'RegistrationRequested' &&
+                    'Challenge registration'}
+                  {detailsData.status === 'ClearingRequested' &&
+                    'Challenge removal'}
+                  {' — ' + formattedDepositCost}
+                </StatusButton>
+              </Header>
               <EntryDetailsContainer>
                 <StatusSpan status={detailsData.status}>
                   {detailsData.status}
@@ -375,14 +317,14 @@ const DetailsModal: React.FC = () => {
               <EvidenceSection>
                 <EvidenceSectionHeader>
                   <EvidenceHeader>Evidences</EvidenceHeader>
-                  <SubmitEvidenceButton
+                  <SubmitButton
                     onClick={() => {
                       setIsConfirmationOpen(true)
                       setEvidenceConfirmationType('Evidence')
                     }}
                   >
                     Submit Evidence
-                  </SubmitEvidenceButton>
+                  </SubmitButton>
                 </EvidenceSectionHeader>
 
                 {evidences.length > 0 ? (

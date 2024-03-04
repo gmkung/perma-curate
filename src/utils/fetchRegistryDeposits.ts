@@ -1,10 +1,13 @@
-import { Contract, ethers } from 'ethers'
+import { Contract, JsonRpcProvider } from 'ethers'
 
 export interface DepositParams {
   submissionBaseDeposit: bigint
   submissionChallengeBaseDeposit: bigint
   removalBaseDeposit: bigint
   removalChallengeBaseDeposit: bigint
+  arbitrator: string
+  arbitratorExtraData: string
+  arbitrationCost: bigint
 }
 
 const LGTCRViewABI = [
@@ -89,19 +92,27 @@ export const fetchRegistryDeposits = async (
   // registry still unknown
   if (!registry) return undefined
 
-  const provider = new ethers.JsonRpcProvider("https://rpc.gnosischain.com")
+  try {
+    const provider = new JsonRpcProvider('https://rpc.gnosischain.com', 100)
 
-  const lgtcrViewContract = new Contract(
-    LGTCRViewAddress,
-    LGTCRViewABI,
-    provider
-  )
-  const viewInfo = await lgtcrViewContract.fetchArbitrable(registry)
-  const depositParams: DepositParams = {
-    submissionBaseDeposit: viewInfo.submissionBaseDeposit,
-    submissionChallengeBaseDeposit: viewInfo.submissionChallengeBaseDeposit,
-    removalBaseDeposit: viewInfo.removalBaseDeposit,
-    removalChallengeBaseDeposit: viewInfo.removalChallengeBaseDeposit,
+    const lgtcrViewContract = new Contract(
+      LGTCRViewAddress,
+      LGTCRViewABI,
+      provider
+    )
+    const viewInfo = await lgtcrViewContract.fetchArbitrable(registry)
+    const depositParams: DepositParams = {
+      submissionBaseDeposit: viewInfo.submissionBaseDeposit,
+      submissionChallengeBaseDeposit: viewInfo.submissionChallengeBaseDeposit,
+      removalBaseDeposit: viewInfo.removalBaseDeposit,
+      removalChallengeBaseDeposit: viewInfo.removalChallengeBaseDeposit,
+      arbitrator: viewInfo.arbitrator,
+      arbitratorExtraData: viewInfo.arbitratorExtraData,
+      arbitrationCost: viewInfo.arbitrationCost,
+    }
+    return depositParams
+  } catch (e) {
+    console.log('fetchRegistryDeposits error!', e)
+    return undefined
   }
-  return depositParams
 }

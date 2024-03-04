@@ -1,34 +1,26 @@
 import styled from 'styled-components'
+import { responsiveSize } from 'styles/responsiveSize'
 
 const Button = styled.button`
   display: flex;
-  background: linear-gradient(145deg, #9575cd, #6c43ab); /* Subtle gradient */
+  background: linear-gradient(145deg, #9575cd, #6c43ab);
   color: white;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
-  padding: 8px 16px;
+  padding: 8px ${responsiveSize(8, 20)};
   border: none;
-  border-radius: 16px; /* More pronounced rounded corners */
+  border-radius: 12px;
   cursor: pointer;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Soft shadow for depth */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
   &:hover {
-    background: linear-gradient(
-      145deg,
-      #a188d6,
-      #7e57c2
-    ); /* Darker gradient for hover */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Larger shadow for lifted effect */
+    background: #6c43ab;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
 
   &:active {
-    background: linear-gradient(
-      145deg,
-      #7e57c2,
-      #6c43ab
-    ); /* Even darker for active state */
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Small shadow to simulate pressing down */
+    background: #6c43ab;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 `
 

@@ -1,10 +1,10 @@
-import { DepositParamsType } from './performEvidenceBasedRequest'
-import { Contract, ethers } from 'ethers'
+import { Contract, BrowserProvider } from 'ethers'
 import klerosCurateABI from './abi/kleros-curate-abi.json'
+import { DepositParams } from './fetchRegistryDeposits'
 
 export async function initiateTransactionToCurate(
   curateContractAddress: string,
-  depositParams: DepositParamsType,
+  depositParams: DepositParams,
   ipfsPath: string
 ): Promise<boolean> {
   try {
@@ -17,7 +17,7 @@ export async function initiateTransactionToCurate(
     }
 
     // Initialize the provider from MetaMask or any injected Ethereum provider
-    const provider = new ethers.BrowserProvider(window.ethereum)
+    const provider = new BrowserProvider(window.ethereum)
     const signer = await provider.getSigner()
 
     // Prompt the user to connect their wallet
@@ -30,16 +30,12 @@ export async function initiateTransactionToCurate(
       signer
     )
 
-    // Define the ether amount you want to send. This is just an example; adjust accordingly.
-    const etherAmount = ethers.parseEther(
-      (
-        depositParams.arbitrationCost + depositParams.submissionBaseDeposit
-      ).toString()
-    ) // calculating ETH/xDai costs using arbitrationCost+submissionBaseDeposit
+    const value =
+      depositParams.arbitrationCost + depositParams.submissionBaseDeposit
 
     // Send the transaction
     const transactionResponse = await contract.addItem(ipfsPath, {
-      value: etherAmount,
+      value,
     })
 
     console.log('Transaction hash:', transactionResponse.hash)

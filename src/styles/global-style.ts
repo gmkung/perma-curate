@@ -12,4 +12,9 @@ export const GlobalStyle = createGlobalStyle`
     --os-handle-bg-active: #75BDAE;
   }
 
+  .react-loading-skeleton {
+    --base-color: #9277B1;
+    --highlight-color: #A98BC9;
+  }
+
 `

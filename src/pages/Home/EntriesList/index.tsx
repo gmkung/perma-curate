@@ -1,17 +1,15 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
-import { calcMinMax } from 'utils/calcMinMax'
 import Entry from './Entry'
 import { ITEMS_PER_PAGE } from '..'
 import { GraphItem } from 'utils/fetchItems'
 
 const EntriesContainer = styled.div`
   width: 80%;
-  margin: auto;
   display: grid;
   grid-template-columns: repeat(1, 1fr);
-  gap: ${calcMinMax(12, 16)};
+  gap: 20px 40px;
   justify-content: center;
 
   ${landscapeStyle(

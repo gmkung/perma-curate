@@ -1,37 +1,107 @@
-import React from 'react'
-import { useSearchParams } from 'react-router-dom'
+import React, { useMemo, useRef, useState } from 'react'
 import styled, { css } from 'styled-components'
-import Button from 'components/Button'
 import { landscapeStyle } from 'styles/landscapeStyle'
-import { calcMinMax } from 'utils/calcMinMax'
+import { responsiveSize } from 'styles/responsiveSize'
+import { useSearchParams } from 'react-router-dom'
+import { relevantNetworks } from 'utils/fetchItems'
+import DownDirectionIcon from 'tsx:svgs/icons/down-direction.svg'
+import { useFocusOutside } from 'hooks/useFocusOutside'
 
-const LabelsContainer = styled.div`
+const FilterContainer = styled.div`
   display: flex;
-  width: 84vw;
-  margin-bottom: ${calcMinMax(16, 24)};
-  flex-direction: column;
-
-  ${landscapeStyle(
-    () => css`
-      width: 80%;
-      flex-direction: row;
-    `
-  )}
+  flex-direction: row;
+  gap: 12px;
 `
 
-const enabledStyle = {
-  background: 'purple',
-  borderRadius: '10px',
-  opacity: '100%',
-}
-const disabledStyle = {
-  borderRadius: '10px',
-  opacity: '70%',
-}
+const DropdownContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 4px;
+`
+
+const FilterDropdown = styled.div<{ open: boolean }>`
+  display: flex;
+  font-size: 18px;
+  font-family: 'Oxanium', sans-serif;
+  font-weight: 600;
+  flex-direction: row;
+  border-radius: 8px;
+  cursor: pointer;
+  &:hover {
+    background: linear-gradient(145deg, #7e57c2, #482c85);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+`
+
+const FilterDropdownIconWrapper = styled.div<{ open: boolean }>`
+  display: flex;
+  margin-left: 8px;
+  padding-bottom: 4px;
+  align-self: center;
+  align-items: center;
+  transform: ${({ open }) => (open ? 'rotate(-180deg);' : 'rotate(0deg)')};
+`
+
+const FilterOptionContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  background-color: #801fdc;
+  margin-top: 30px;
+  position: absolute;
+  border-radius: 8px;
+`
+
+// when selected, has a border, bold and more opacity
+const FilterOption = styled.div<{ selected: boolean }>`
+  text-align: center;
+  font-family: 'Oxanium', sans-serif;
+  font-size: 16px;
+  padding: 6px;
+  font-weight: ${({ selected }) => (selected ? 'bold' : 'normal')};
+  opacity: ${({ selected }) => (selected ? '100%' : '60%')};
+  cursor: pointer;
+  &:hover {
+    background: linear-gradient(145deg, #7e57c2, #482c85);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+`
+
+// renders right of the dropdown filter
+const RemovableFilterContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+`
+
+const RemovableFilter = styled.div`
+  display: flex;
+  background-color: #380c65;
+  font-family: 'Oxanium', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  height: 28px;
+  align-items: center;
+  padding: 0 4px;
+  border-radius: 6px;
+  cursor: pointer;
+
+  &:hover {
+    background: linear-gradient(145deg, #7e57c2, #482c85);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+`
 
 const Statuses: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  const statuses = searchParams.getAll('status')
+  const [open, setOpen] = useState<boolean>(false)
+  const statuses = useMemo(() => searchParams.getAll('status'), [searchParams])
+  const disputeds = useMemo(
+    () => searchParams.getAll('disputed'),
+    [searchParams]
+  )
+  const dropdownRef = useRef(null)
+  useFocusOutside(dropdownRef, () => setOpen((open) => false))
 
   const toggleStatus = (status: string) => {
     setSearchParams((prev) => {
@@ -51,46 +121,6 @@ const Statuses: React.FC = () => {
       return newParams
     })
   }
-
-  return (
-    <LabelsContainer>
-      <Button
-        style={statuses.includes('Registered') ? enabledStyle : disabledStyle}
-        onClick={() => toggleStatus('Registered')}
-      >
-        Registered
-      </Button>
-      <Button
-        style={
-          statuses.includes('RegistrationRequested')
-            ? enabledStyle
-            : disabledStyle
-        }
-        onClick={() => toggleStatus('RegistrationRequested')}
-      >
-        Submitted
-      </Button>
-      <Button
-        style={
-          statuses.includes('ClearingRequested') ? enabledStyle : disabledStyle
-        }
-        onClick={() => toggleStatus('ClearingRequested')}
-      >
-        Removing
-      </Button>
-      <Button
-        style={statuses.includes('Absent') ? enabledStyle : disabledStyle}
-        onClick={() => toggleStatus('Absent')}
-      >
-        Removed
-      </Button>
-    </LabelsContainer>
-  )
-}
-
-const Challenged: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const disputeds = searchParams.getAll('disputed')
 
   const toggleDisputed = (boolString: string) => {
     setSearchParams((prev) => {
@@ -113,27 +143,101 @@ const Challenged: React.FC = () => {
     })
   }
 
+  const toggleStatusOrDisputed = (s: string) => {
+    if (s === 'true' || s === 'false') {
+      toggleDisputed(s)
+    } else {
+      toggleStatus(s)
+    }
+  }
+
   return (
-    <LabelsContainer>
-      <Button
-        style={disputeds.includes('false') ? enabledStyle : disabledStyle}
-        onClick={() => toggleDisputed('false')}
-      >
-        Unchallenged
-      </Button>
-      <Button
-        style={disputeds.includes('true') ? enabledStyle : disabledStyle}
-        onClick={() => toggleDisputed('true')}
-      >
-        Challenged
-      </Button>
-    </LabelsContainer>
+    <FilterContainer>
+      <DropdownContainer ref={dropdownRef}>
+        <FilterDropdown open={open} onClick={() => setOpen((open) => !open)}>
+          Status
+          <FilterDropdownIconWrapper open={open}>
+            <DownDirectionIcon />
+          </FilterDropdownIconWrapper>
+        </FilterDropdown>
+        {open && (
+          <FilterOptionContainer>
+            <FilterOption
+              selected={statuses.includes('Registered')}
+              onClick={() => toggleStatusOrDisputed('Registered')}
+            >
+              Registered
+            </FilterOption>
+            <FilterOption
+              selected={statuses.includes('RegistrationRequested')}
+              onClick={() => toggleStatusOrDisputed('RegistrationRequested')}
+            >
+              Submitted
+            </FilterOption>
+            <FilterOption
+              selected={statuses.includes('ClearingRequested')}
+              onClick={() => toggleStatusOrDisputed('ClearingRequested')}
+            >
+              Removing
+            </FilterOption>
+            <FilterOption
+              selected={statuses.includes('Absent')}
+              onClick={() => toggleStatusOrDisputed('Absent')}
+            >
+              Removed
+            </FilterOption>
+            {/* separation bar here? todo */}
+            <FilterOption
+              selected={disputeds.includes('false')}
+              onClick={() => toggleStatusOrDisputed('false')}
+            >
+              Unchallenged
+            </FilterOption>
+            <FilterOption
+              selected={disputeds.includes('true')}
+              onClick={() => toggleStatusOrDisputed('true')}
+            >
+              Challenged
+            </FilterOption>
+          </FilterOptionContainer>
+        )}
+      </DropdownContainer>
+      <RemovableFilterContainer>
+        {statuses.map((s) => (
+          <RemovableFilter key={s} onClick={() => toggleStatus(s)}>
+            {
+              {
+                Registered: 'Registered',
+                RegistrationRequested: 'Submitted',
+                ClearingRequested: 'Removing',
+                Absent: 'Removed',
+              }[s]
+            }{' '}
+            ✕
+          </RemovableFilter>
+        ))}
+        {disputeds.map((s) => (
+          <RemovableFilter key={s} onClick={() => toggleDisputed(s)}>
+            {
+              {
+                true: 'Challenged',
+                false: 'Unchallenged',
+              }[s]
+            }{' '}
+            ✕
+          </RemovableFilter>
+        ))}
+      </RemovableFilterContainer>
+    </FilterContainer>
   )
 }
 
 const Networks: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  const networks = searchParams.getAll('network')
+  const [open, setOpen] = useState<boolean>(false)
+  const networks = useMemo(() => searchParams.getAll('network'), [searchParams])
+  const dropdownRef = useRef(null)
+  useFocusOutside(dropdownRef, () => setOpen((open) => false))
 
   const toggleNetwork = (network: string) => {
     setSearchParams((prev) => {
@@ -154,39 +258,52 @@ const Networks: React.FC = () => {
     })
   }
 
+  // todo refactor
+  // adding networks manually should be a crime
   return (
-    <LabelsContainer>
-      <Button
-        style={networks.includes('1') ? enabledStyle : disabledStyle}
-        onClick={() => toggleNetwork('1')}
-      >
-        Mainnet
-      </Button>
-      <Button
-        style={networks.includes('100') ? enabledStyle : disabledStyle}
-        onClick={() => toggleNetwork('100')}
-      >
-        Gnosis
-      </Button>
-      <Button
-        style={networks.includes('137') ? enabledStyle : disabledStyle}
-        onClick={() => toggleNetwork('137')}
-      >
-        Polygon
-      </Button>
-      <Button
-        style={networks.includes('56') ? enabledStyle : disabledStyle}
-        onClick={() => toggleNetwork('56')}
-      >
-        BSC
-      </Button>
-    </LabelsContainer>
+    <FilterContainer>
+      <DropdownContainer ref={dropdownRef}>
+        <FilterDropdown open={open} onClick={() => setOpen((open) => !open)}>
+          Network
+          <FilterDropdownIconWrapper open={open}>
+            <DownDirectionIcon />
+          </FilterDropdownIconWrapper>
+        </FilterDropdown>
+        {open && (
+          <FilterOptionContainer>
+            {relevantNetworks.map((n) => (
+              <FilterOption
+                key={n.chainId}
+                selected={networks.includes(String(n.chainId))}
+                onClick={() => toggleNetwork(String(n.chainId))}
+              >
+                {n.name}
+              </FilterOption>
+            ))}
+          </FilterOptionContainer>
+        )}
+      </DropdownContainer>
+      <RemovableFilterContainer>
+        {networks.length === 0 ? (
+          <RemovableFilter>All Networks</RemovableFilter>
+        ) : (
+          networks.map((s) => (
+            <RemovableFilter key={s} onClick={() => toggleNetwork(s)}>
+              {relevantNetworks.find((n) => s === String(n.chainId))?.name} ✕
+            </RemovableFilter>
+          ))
+        )}
+      </RemovableFilterContainer>
+    </FilterContainer>
   )
 }
 
 const Ordering: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
-  const direction = searchParams.get('orderDirection')
+  const direction = useMemo(
+    () => searchParams.get('orderDirection'),
+    [searchParams]
+  )
 
   const toggleDirection = () => {
     setSearchParams((prev) => {
@@ -207,19 +324,29 @@ const Ordering: React.FC = () => {
   }
 
   return (
-    <LabelsContainer>
-      <Button style={enabledStyle} onClick={() => toggleDirection()}>
-        {direction === 'desc' ? 'Newest' : 'Oldest'}
-      </Button>
-    </LabelsContainer>
+    <FilterContainer>
+      <DropdownContainer>
+        <FilterDropdown
+          open={direction === 'desc'}
+          onClick={() => toggleDirection()}
+        >
+          {direction === 'desc' ? 'Newest' : 'Oldest'}
+          <FilterDropdownIconWrapper open={direction === 'asc'}>
+            <DownDirectionIcon />
+          </FilterDropdownIconWrapper>
+        </FilterDropdown>
+      </DropdownContainer>
+    </FilterContainer>
   )
 }
 
 const Container = styled.div`
   display: flex;
   width: 84vw;
-  margin-bottom: ${calcMinMax(16, 24)};
   flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: ${responsiveSize(24, 28)};
 
   ${landscapeStyle(
     () => css`
@@ -233,7 +360,6 @@ const Filters: React.FC = () => {
   return (
     <Container>
       <Statuses />
-      <Challenged />
       <Networks />
       <Ordering />
     </Container>

@@ -7,6 +7,26 @@ export const registryMap = {
   Tokens: '0xee1502e29795ef6c2d60f8d7120596abe3bad990',
 }
 
+export const revRegistryMap = {
+  '0x66260c69d03837016d88c9877e61e08ef74c59f2': 'Tags',
+  '0x957a53a994860be4750810131d9c876b2f52d6e1': 'CDN',
+  '0xee1502e29795ef6c2d60f8d7120596abe3bad990': 'Tokens',
+}
+
+export const relevantNetworks: { chainId: number; name: string }[] = [
+  { chainId: 1, name: 'Mainnet' },
+  { chainId: 100, name: 'Gnosis' },
+  { chainId: 137, name: 'Polygon' },
+  { chainId: 56, name: 'BSC' },
+  { chainId: 42161, name: 'Arbitrum One' },
+  { chainId: 10, name: 'Optimism' },
+  { chainId: 43114, name: 'Avalanche C-Chain' },
+  { chainId: 42220, name: 'Celo Mainnet' },
+  { chainId: 8453, name: 'Base Mainnet' },
+  { chainId: 250, name: 'Fantom Opera' },
+  { chainId: 324, name: 'zkSync' },
+]
+
 export interface GraphItem {
   id: string
   latestRequestSubmissionTime: string
@@ -71,7 +91,6 @@ export const fetchItems = async (
     registry.length === 0 ||
     status.length === 0 ||
     disputed.length === 0 ||
-    network.length === 0 ||
     page === 0
   ) {
     // This query is invalid, defaults haven't come yet.
@@ -81,17 +100,6 @@ export const fetchItems = async (
   const networkQueryObject = `{or: [${network
     .map((chainId) => `{key0_starts_with_nocase: "eip155:${chainId}:"}`)
     .join(',')}]},`
-
-  // todo rethink the "lastId" thing? remove it?
-  // because as it is rn, moving pages in a complex search involving > 1000 items
-  // is going to suck and maybe even break the search!
-
-  // yea I think fuck it. lets do the following
-  // query 21 items, enough to be able to go up a page and check if there's more
-  // show ? total items if you get 21 items out of the buffer.
-  // use deduction to figure out how many items if <21 on current query (counting all previous 20 sized pages.)
-  // that way is fast, you dont get total number but idc.
-  // the main numbers we care about anyway are the "total" numbers, the main counts.
 
   const query = gql`
     query (
@@ -111,7 +119,7 @@ export const fetchItems = async (
             {disputed_in: $disputed},
             # network section, dynamically generated.
             # only use if needed
-            ${network.length === 4 ? '' : networkQueryObject}
+            ${network.length === 0 ? '' : networkQueryObject}
             # filtering
             {or: [
               {key0_contains_nocase: $text},

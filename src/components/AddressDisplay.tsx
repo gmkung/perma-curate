@@ -12,6 +12,12 @@ const StyledSpan = styled.span<{ bgColor: string }>`
   color: white;
   border-radius: 4px;
   background-color: ${(props) => props.bgColor};
+  margin-right: 4px;
+`
+
+const StyledAddressA = styled.a`
+  text-decoration: underline;
+  color: #fff;
 `
 
 const truncateAddress = (addr: string) => {
@@ -29,11 +35,17 @@ const AddressDisplay: React.FC<IAddressDisplay> = ({ address }) => {
     (ref) => `${ref.namespaceId}:${ref.id}` === keyForReference
   )
   const bgColor = chainColorMap[keyForReference] || '#a0aec0'
+  console.log(keyForReference)
 
   return (
     <Container>
-      {truncateAddress(parts[2]) + ' '}
       <StyledSpan bgColor={bgColor}>{reference?.label}</StyledSpan>
+      <StyledAddressA
+        target="_blank"
+        href={`https://${reference?.explorer}/address/${parts[2]}`}
+      >
+        {truncateAddress(parts[2])}
+      </StyledAddressA>
     </Container>
   )
 }

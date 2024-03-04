@@ -1,4 +1,4 @@
-import { Contract, ethers } from 'ethers'
+import { Contract, JsonRpcProvider } from 'ethers'
 
 const ArbitratorABI = [
   {
@@ -19,11 +19,18 @@ export const fetchArbitrationCost = async (
   // itemDetails still unknown
   if (!arbitrator || !arbitratorExtraData) return undefined
 
-  const provider = new ethers.JsonRpcProvider("https://rpc.gnosischain.com")
-  const arbitratorContract = new Contract(arbitrator, ArbitratorABI, provider)
-  const arbitrationCost = await arbitratorContract.arbitrationCost(
-    arbitratorExtraData
-  )
+  try {
+    const provider = new JsonRpcProvider('https://rpc.gnosischain.com', 100)
 
-  return arbitrationCost
+    const arbitratorContract = new Contract(arbitrator, ArbitratorABI, provider)
+
+    const arbitrationCost = await arbitratorContract.arbitrationCost(
+      arbitratorExtraData
+    )
+
+    return arbitrationCost
+  } catch (e) {
+    console.log('fetchArbitrationCost error!', e)
+    return undefined
+  }
 }
