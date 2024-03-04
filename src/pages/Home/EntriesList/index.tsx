@@ -7,7 +7,6 @@ import { GraphItem } from 'utils/fetchItems'
 
 const EntriesContainer = styled.div`
   width: 80%;
-  margin-top: 24px;
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: 20px 40px;

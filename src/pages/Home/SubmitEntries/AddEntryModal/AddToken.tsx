@@ -10,9 +10,13 @@ import { DepositParams } from 'utils/fetchRegistryDeposits'
 import { formatEther } from 'ethers'
 import {
   AddContainer,
+  AddHeader,
+  AddSubtitle,
+  AddTitle,
   Buttons,
   ErrorMessage,
   ReturnButton,
+  StyledGoogleFormAnchor,
   StyledTextInput,
   SubmitButton,
 } from '.'
@@ -113,7 +117,18 @@ const AddToken: React.FC = () => {
 
   return (
     <AddContainer>
-      <h2>Submit Token</h2>
+      <AddHeader>
+        <AddTitle>Submit Token</AddTitle>
+        <AddSubtitle>
+          Want to suggest an entry without any deposit?{' '}
+          <StyledGoogleFormAnchor
+            target="_blank"
+            href="https://docs.google.com/forms/d/e/1FAIpQLSchZ5RBd1Y8RNpGCUGY9tZyQZSBgnN_4B9oLfKeKuer9oxGnA/viewform"
+          >
+            Click here
+          </StyledGoogleFormAnchor>
+        </AddSubtitle>
+      </AddHeader>
       <RichAddressForm
         networkOption={network}
         setNetwork={setNetwork}

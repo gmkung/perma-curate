@@ -1,17 +1,17 @@
 import React, { useEffect, useMemo } from 'react'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
+import { responsiveSize } from 'styles/responsiveSize'
 import { useSearchParams, createSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { fetchItems } from 'utils/fetchItems'
 import { fetchItemCounts } from 'utils/itemCounts'
-import Header from './Header'
+import Navbar from './Navbar'
 import RegistryDetails from './RegistryDetails'
-import SubmitEntries from './SubmitEntries'
+import SubmitButton from './SubmitButton'
 import Search from './Search'
 import LoadingItems from './LoadingItems'
 import EntriesList from './EntriesList'
-import Footer from 'components/Footer'
 import Pagination from './Pagination'
 import DetailsModal from './DetailsModal'
 import RegistryDetailsModal from './RegistryDetails/RegistryDetailsModal'
@@ -25,23 +25,39 @@ const Container = styled.div`
   background: #5a2393;
   min-height: 100vh;
   color: white;
-  padding: 16px;
+  padding-bottom: 48px;
 `
 
-const RegistryDetailsAndSubmitContainer = styled.div`
+const SearchAndRegistryDetailsAndSubmitContainer = styled.div`
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
   align-items: center;
   background: #5a2393;
   color: white;
   width: 84vw;
-  margin-bottom: 12px;
-  gap: 12px;
+  margin-bottom: ${responsiveSize(24, 24)};
+  gap: 16px;
   flex-wrap: wrap;
 
   ${landscapeStyle(
     () => css`
       width: 80%;
+    `
+  )}
+`
+
+const RegistryDetailsAndSubmitContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: 100%;
+
+  ${landscapeStyle(
+    () => css`
+      width: auto;
     `
   )}
 `
@@ -194,13 +210,15 @@ const Home: React.FC = () => {
 
   return (
     <Container>
-      <Header />
-      <RegistryDetailsAndSubmitContainer>
-        <RegistryDetails />
-        <SubmitEntries />
-      </RegistryDetailsAndSubmitContainer>
+      <Navbar />
+      <SearchAndRegistryDetailsAndSubmitContainer>
+        <Search />
+        <RegistryDetailsAndSubmitContainer>
+          <RegistryDetails />
+          <SubmitButton />
+        </RegistryDetailsAndSubmitContainer>
+      </SearchAndRegistryDetailsAndSubmitContainer>
 
-      <Search />
       <Filters />
 
       {searchLoading || !searchData ? (
@@ -209,7 +227,6 @@ const Home: React.FC = () => {
         <EntriesList searchData={searchData} />
       )}
       <Pagination totalPages={totalPages} />
-      <Footer />
 
       {isDetailsModalOpen && <DetailsModal />}
       {isRegistryDetailsModalOpen && <RegistryDetailsModal />}

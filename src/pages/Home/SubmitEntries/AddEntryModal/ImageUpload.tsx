@@ -1,5 +1,27 @@
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import styled from 'styled-components'
 import ipfsPublish from 'utils/ipfsPublish'
+
+const StyledLabel = styled.label`
+  cursor: pointer;
+  width: 100px;
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #855caf;
+  color: white;
+  border-radius: 12px;
+  position: relative;
+  &:hover {
+    background-color: #9277b1;
+  }
+`
+
+const StyledInput = styled.input`
+  opacity: 0;
+  width: 0.1px;
+  height: 0.1px;
+  position: absolute;
+`
 
 const ImageUpload: React.FC<{
   path: string
@@ -22,12 +44,15 @@ const ImageUpload: React.FC<{
   return (
     <>
       Image
-      <input
-        type="file"
-        onChange={(e) => {
-          setImageFile(e.target.files ? e.target.files[0] : null)
-        }}
-      />
+      <StyledLabel>
+        Upload Image
+        <StyledInput
+          type="file"
+          onChange={(e) => {
+            setImageFile(e.target.files ? e.target.files[0] : null)
+          }}
+        />
+      </StyledLabel>
       {p.path && (
         <img
           width={200}

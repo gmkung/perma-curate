@@ -1,30 +1,30 @@
 import React, { useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import styled, { css } from 'styled-components'
-import { responsiveSize } from 'styles/responsiveSize'
 import { landscapeStyle } from 'styles/landscapeStyle'
+import { responsiveSize } from 'styles/responsiveSize'
+import { useSearchParams } from 'react-router-dom'
 import { relevantNetworks } from 'utils/fetchItems'
 import DownDirectionIcon from 'tsx:svgs/icons/down-direction.svg'
 import { useFocusOutside } from 'hooks/useFocusOutside'
 
 const FilterContainer = styled.div`
-  padding: 4px;
   display: flex;
   flex-direction: row;
+  gap: 12px;
 `
 
 const DropdownContainer = styled.div`
   display: flex;
   flex-direction: column;
-  margin-right: 20px;
+  margin-top: 4px;
 `
 
 const FilterDropdown = styled.div<{ open: boolean }>`
-  font-size: 20px;
-  font-family: 'Orbitron', sans-serif;
   display: flex;
+  font-size: 18px;
+  font-family: 'Oxanium', sans-serif;
+  font-weight: 600;
   flex-direction: row;
-  padding: 4px;
   border-radius: 8px;
   cursor: pointer;
   &:hover {
@@ -34,15 +34,18 @@ const FilterDropdown = styled.div<{ open: boolean }>`
 `
 
 const FilterDropdownIconWrapper = styled.div<{ open: boolean }>`
+  display: flex;
   margin-left: 8px;
   padding-bottom: 4px;
-  transform: ${({ open }) => (open ? 'rotate(-180deg)' : 'rotate(0deg)')};
+  align-self: center;
+  align-items: center;
+  transform: ${({ open }) => (open ? 'rotate(-180deg);' : 'rotate(0deg)')};
 `
 
 const FilterOptionContainer = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: rgba(136, 34, 233, 0.9);
+  background-color: #801fdc;
   margin-top: 30px;
   position: absolute;
   border-radius: 8px;
@@ -68,23 +71,21 @@ const RemovableFilterContainer = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  gap: 8px;
 `
 
 const RemovableFilter = styled.div`
+  display: flex;
   background-color: #380c65;
   font-family: 'Oxanium', sans-serif;
   font-size: 16px;
   font-weight: 400;
-  padding-top: 6px;
-  padding-bottom: 4px;
-  padding-left: 4px;
-  padding-right: 4px;
+  height: 28px;
+  align-items: center;
+  padding: 0 4px;
   border-radius: 6px;
-  margin-bottom: 2px;
-  margin-left: 2px;
-  margin-right: 2px;
-  max-height: 28px;
   cursor: pointer;
+
   &:hover {
     background: linear-gradient(145deg, #7e57c2, #482c85);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -342,8 +343,10 @@ const Ordering: React.FC = () => {
 const Container = styled.div`
   display: flex;
   width: 84vw;
-  margin-bottom: ${responsiveSize(4, 8)};
   flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: ${responsiveSize(24, 28)};
 
   ${landscapeStyle(
     () => css`

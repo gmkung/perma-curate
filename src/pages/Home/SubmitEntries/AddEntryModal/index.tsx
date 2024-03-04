@@ -30,7 +30,7 @@ const ModalContainer = styled.div`
 
   ${landscapeStyle(
     () => css`
-      width: 75%;
+      width: 43%;
     `
   )}
 `
@@ -39,7 +39,30 @@ export const AddContainer = styled.div`
   display: flex;
   padding: ${responsiveSize(16, 32)};
   flex-direction: column;
-  gap: 12px;
+  gap: 18px;
+`
+
+export const AddHeader = styled.div`
+  margin-bottom: 20px;
+`
+
+export const AddTitle = styled.h2`
+  margin: 0;
+  margin-bottom: 4px;
+`
+
+export const AddSubtitle = styled.div`
+  font-size: 15px;
+  opacity: 70%;
+`
+
+export const StyledGoogleFormAnchor = styled.a`
+  color: #fff;
+  text-decoration: none;
+
+  :hover {
+    text-decoration: underline;
+  }
 `
 
 export const StyledWholeField = styled.div`
@@ -49,28 +72,24 @@ export const StyledWholeField = styled.div`
 
 export const StyledTextInput = styled.input`
   display: flex;
-  padding: 12px;
+  background: #855caf;
+  padding: 8px 12px;
   outline: none;
-  border: 2px solid #805ad5;
-  border-left: 0;
-  color: #2d3748;
+  border: none;
   border-radius: 12px;
-  border-radius: 0 12px 12px 12px;
-  font-family: 'Oxanium', sans-serif;
-  font-size: 16px;
+  color: #fff;
+  font-size: 20px;
   font-weight: 700;
+
   ::placeholder {
-    font-family: 'Oxanium', sans-serif;
-    font-size: 20px;
     font-weight: 700;
-    color: #c7c7c7;
+    color: #cd9dff;
   }
 
   ${landscapeStyle(
     () => css`
-      width: 95%;
+      width: 93%;
       padding-left: 24px;
-      border-radius: 0 12px 12px 0;
     `
   )}
 `
@@ -130,7 +149,7 @@ export const SubmitButton = styled.button`
   }
 
   &:disabled {
-    background-color: #c7c7c7;
+    background-color: #a092b1;
     cursor: not-allowed;
   }
 
@@ -160,7 +179,7 @@ export const ReturnButton = () => {
   }
 
   return (
-    <StyledReturnButton onClick={() => closeModal()}>Return</StyledReturnButton>
+    <StyledReturnButton onClick={() => closeModal()}>Back</StyledReturnButton>
   )
 }
 

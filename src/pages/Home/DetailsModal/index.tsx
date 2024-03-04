@@ -35,11 +35,12 @@ const ModalContainer = styled.div`
   background-color: #5a2393;
   border-radius: 12px;
   width: 84vw;
-  position: relative;
+  max-height: 85vh;
+  overflow-y: auto;
   color: #fff;
   flex-direction: column;
-  overflow-y: hidden;
   flex-wrap: wrap;
+  position: relative;
 
   ${landscapeStyle(
     () => css`
@@ -89,7 +90,6 @@ const StatusButton = styled.button<{ status: string }>`
 
 const DetailsContent = styled.div`
   padding: ${responsiveSize(16, 24)};
-  overflow-y: auto;
   flex-grow: 1;
 `
 
@@ -146,8 +146,8 @@ const EvidenceHeader = styled.h2`
 
 const Evidence = styled.div`
   padding: 12px;
-  background-color: #f7fafc;
   border-radius: 4px;
+  border: 1px solid #edf2f7;
   font-family: serif;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   margin-bottom: 16px;

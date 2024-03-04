@@ -41,8 +41,20 @@ const ConfirmationTitle = styled.h3``
 const TextArea = styled.textarea`
   width: 93%;
   padding: 8px;
-  border: 1px solid #e2e8f0;
+  border: none;
+  outline: none;
+  overflow: auto;
   border-radius: 4px;
+  background: #855caf;
+  color: #fff;
+
+  :active {
+    border: none;
+  }
+
+  -webkit-box-shadow: none;
+  -moz-box-shadow: none;
+  box-shadow: none;
 
   ${landscapeStyle(
     () => css`

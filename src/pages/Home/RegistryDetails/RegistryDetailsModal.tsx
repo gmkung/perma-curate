@@ -1,4 +1,6 @@
-import React, { useMemo, useRef } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
 import { responsiveSize } from 'styles/responsiveSize'
@@ -34,7 +36,7 @@ const ModalContainer = styled.div`
 
   ${landscapeStyle(
     () => css`
-      width: 65%;
+      width: 43%;
     `
   )}
 `
@@ -44,7 +46,6 @@ const StyledLabel = styled.div`
   justify-content: center;
   flex-wrap: wrap;
   font-size: 20px;
-  font-family: 'Orbitron', sans-serif;
   font-weight: bold;
   color: #fff;
   padding: 0 ${responsiveSize(16, 32)};
@@ -65,6 +66,7 @@ const StyledImg = styled.img`
 
 const RegistryDetailsModal: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const [imgLoaded, setImgLoaded] = useState(false)
 
   const {
     isLoading: countsLoading,
@@ -116,8 +118,11 @@ const RegistryDetailsModal: React.FC = () => {
               Link
             </StyledA>
           </StyledLabel>
+          {!imgLoaded && <Skeleton height={200} width={200} />}
           <StyledImg
             src={`https://ipfs.kleros.io${registry.metadata.logoURI}`}
+            onLoad={() => setImgLoaded(true)}
+            style={{ display: imgLoaded ? 'block' : 'none' }}
           ></StyledImg>
         </ModalContainer>
       )}

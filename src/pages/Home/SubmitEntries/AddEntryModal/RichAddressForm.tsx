@@ -9,38 +9,57 @@ const StyledAddressDiv = styled.div`
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  margin-top: 8px;
 `
 
 const StyledNetworkSelect = styled(Select)`
   font-weight: bold;
-  color: black;
+  color: #cd9dff;
   width: 200px;
+
+  > div {
+    background-color: #855caf;
+    border: none;
+    border-radius: 12px 12px 0 0;
+
+    > input {
+      color: #fff;
+      padding: 12px;
+      background-color: #855caf;
+      border-radius: 12px;
+
+      :hover {
+        background-color: #855caf;
+      }
+    }
+  }
+  * div {
+    color: #fff;
+    padding: 5px 11px;
+  }
 `
 
-const StyledAddressInput = styled.input`
+export const StyledAddressInput = styled.input`
   display: flex;
-  padding: 12px;
+  width: 100%;
+  background: #855caf;
+  padding: 8px 12px;
   outline: none;
-  border: 2px solid #805ad5;
-  border-left: 0;
-  color: #2d3748;
-  border-radius: 12px;
+  border: none;
+  color: #fff;
   border-radius: 0 12px 12px 12px;
-  font-family: 'Oxanium', sans-serif;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   ::placeholder {
-    font-family: 'Oxanium', sans-serif;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
-    color: #c7c7c7;
+    color: #cd9dff;
   }
 
   ${landscapeStyle(
     () => css`
-      width: 100%;
+      width: 95%;
       padding-left: 24px;
-      border-radius: 0 12px 12px 0;
     `
   )}
 `

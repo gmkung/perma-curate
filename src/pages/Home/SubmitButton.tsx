@@ -2,24 +2,16 @@ import React from 'react'
 import { useSearchParams } from 'react-router-dom'
 import styled, { css } from 'styled-components'
 import { landscapeStyle } from 'styles/landscapeStyle'
+import Button from 'components/Button'
 
-const StyledButton = styled.button`
-  background-color: #883ae1;
-  border-radius: 12px;
-  font-size: 22px;
-  font-family: 'Orbitron', sans-serif;
-  color: #ffffff;
-  padding: 14px 20px;
-  border: none;
-  font-weight: 700;
-  width: 100%;
-  cursor: pointer;
-  ${landscapeStyle(
-    () => css`
-      width: auto;
-    `
-  )};
-  &:hover {
+const StyledButton = styled(Button)`
+  display: flex;
+  background: #cd9dff;
+  color: #380c65;
+  font-family: 'Avenir', sans-serif;
+  ${landscapeStyle(() => css``)};
+  &:hover,
+  active {
     background: linear-gradient(145deg, #a188d6, #7e57c2);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
