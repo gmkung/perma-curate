@@ -1,5 +1,6 @@
 {
   "name": "@kleros/perma-curate",
+  "homepage": "./",
   "source": "src/index.html",
   "version": "0.1.0",
   "license": "MIT",
@@ -20,7 +21,7 @@
   },
   "scripts": {
     "start": "parcel",
-    "build": "parcel build"
+    "build": "parcel build --public-url ./"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.12.2",
