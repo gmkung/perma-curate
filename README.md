@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/38e0196e-1d60-483c-8369-3c686c21c5c2/deploy-status)](https://app.netlify.com/sites/perma-curate/deploys)
+
 ## Getting Started
 
 Install dependencies and run the development server:
