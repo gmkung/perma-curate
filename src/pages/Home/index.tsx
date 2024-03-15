@@ -17,6 +17,7 @@ import DetailsModal from './DetailsModal'
 import RegistryDetailsModal from './RegistryDetails/RegistryDetailsModal'
 import Filters from './Filters'
 import AddEntryModal from './SubmitEntries/AddEntryModal'
+import CloseIcon from 'tsx:svgs/icons/close.svg'
 
 const Container = styled.div`
   display: flex;
@@ -60,6 +61,22 @@ const RegistryDetailsAndSubmitContainer = styled.div`
       width: auto;
     `
   )}
+`
+
+export const StyledCloseButton = styled(CloseIcon)`
+  display: flex;
+  z-index: 100;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+`
+
+export const ClosedButtonContainer = styled.div`
+  display: flex;
+  width: 24px;
+  height: 24px;
 `
 
 export const ITEMS_PER_PAGE = 20

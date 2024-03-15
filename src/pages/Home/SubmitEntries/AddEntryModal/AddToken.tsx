@@ -13,13 +13,13 @@ import {
   AddHeader,
   AddSubtitle,
   AddTitle,
-  Buttons,
+  CloseButton,
   ErrorMessage,
-  ReturnButton,
   StyledGoogleFormAnchor,
   StyledTextInput,
   SubmitButton,
 } from '.'
+import { ClosedButtonContainer } from '../..'
 
 const columns = [
   {
@@ -118,16 +118,21 @@ const AddToken: React.FC = () => {
   return (
     <AddContainer>
       <AddHeader>
-        <AddTitle>Submit Token</AddTitle>
-        <AddSubtitle>
-          Want to suggest an entry without any deposit?{' '}
-          <StyledGoogleFormAnchor
-            target="_blank"
-            href="https://docs.google.com/forms/d/e/1FAIpQLSchZ5RBd1Y8RNpGCUGY9tZyQZSBgnN_4B9oLfKeKuer9oxGnA/viewform"
-          >
-            Click here
-          </StyledGoogleFormAnchor>
-        </AddSubtitle>
+        <div>
+          <AddTitle>Submit Token</AddTitle>
+          <AddSubtitle>
+            Want to suggest an entry without any deposit?{' '}
+            <StyledGoogleFormAnchor
+              target="_blank"
+              href="https://docs.google.com/forms/d/e/1FAIpQLSchZ5RBd1Y8RNpGCUGY9tZyQZSBgnN_4B9oLfKeKuer9oxGnA/viewform"
+            >
+              Click here
+            </StyledGoogleFormAnchor>
+          </AddSubtitle>
+        </div>
+        <ClosedButtonContainer>
+          <CloseButton />
+        </ClosedButtonContainer>
       </AddHeader>
       <RichAddressForm
         networkOption={network}
@@ -159,18 +164,15 @@ const AddToken: React.FC = () => {
         onChange={(e) => setSymbol(e.target.value)}
       />
       <ImageUpload path={path} setPath={setPath} />
-      <Buttons>
-        <ReturnButton />
-        <SubmitButton disabled={submittingDisabled} onClick={submitToken}>
-          Submit -{' '}
-          {countsData &&
-            formatEther(
-              countsData.Tokens.deposits.arbitrationCost +
-                countsData.Tokens.deposits.submissionBaseDeposit
-            )}{' '}
-          xDAI
-        </SubmitButton>
-      </Buttons>
+      <SubmitButton disabled={submittingDisabled} onClick={submitToken}>
+        Submit -{' '}
+        {countsData &&
+          formatEther(
+            countsData.Tokens.deposits.arbitrationCost +
+              countsData.Tokens.deposits.submissionBaseDeposit
+          )}{' '}
+        xDAI
+      </SubmitButton>
     </AddContainer>
   )
 }

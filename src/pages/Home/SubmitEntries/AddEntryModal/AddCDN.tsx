@@ -13,13 +13,13 @@ import {
   AddHeader,
   AddSubtitle,
   AddTitle,
-  Buttons,
+  CloseButton,
   ErrorMessage,
-  ReturnButton,
   StyledGoogleFormAnchor,
   StyledTextInput,
   SubmitButton,
 } from '.'
+import { ClosedButtonContainer } from '../..'
 
 const columns = [
   {
@@ -101,16 +101,21 @@ const AddCDN: React.FC = () => {
   return (
     <AddContainer>
       <AddHeader>
-        <AddTitle>Submit CDN</AddTitle>
-        <AddSubtitle>
-          Want to suggest an entry without any deposit?{' '}
-          <StyledGoogleFormAnchor
-            target="_blank"
-            href="https://docs.google.com/forms/d/e/1FAIpQLSeO32UBCpIYu3XIKGM-hLqWu51XcsSG1QRxtuycZPyS9mMtVg/viewform"
-          >
-            Click here
-          </StyledGoogleFormAnchor>
-        </AddSubtitle>
+        <div>
+          <AddTitle>Submit CDN</AddTitle>
+          <AddSubtitle>
+            Want to suggest an entry without any deposit?{' '}
+            <StyledGoogleFormAnchor
+              target="_blank"
+              href="https://docs.google.com/forms/d/e/1FAIpQLSeO32UBCpIYu3XIKGM-hLqWu51XcsSG1QRxtuycZPyS9mMtVg/viewform"
+            >
+              Click here
+            </StyledGoogleFormAnchor>
+          </AddSubtitle>
+        </div>
+        <ClosedButtonContainer>
+          <CloseButton />
+        </ClosedButtonContainer>
       </AddHeader>
       <RichAddressForm
         networkOption={network}
@@ -130,18 +135,15 @@ const AddCDN: React.FC = () => {
         onChange={(e) => setDomain(e.target.value)}
       />
       <ImageUpload path={path} setPath={setPath} />
-      <Buttons>
-        <ReturnButton />
-        <SubmitButton disabled={submittingDisabled} onClick={submitCDN}>
-          Submit -{' '}
-          {countsData &&
-            formatEther(
-              countsData.CDN.deposits.arbitrationCost +
-                countsData.CDN.deposits.submissionBaseDeposit
-            )}{' '}
-          xDAI
-        </SubmitButton>
-      </Buttons>
+      <SubmitButton disabled={submittingDisabled} onClick={submitCDN}>
+        Submit -{' '}
+        {countsData &&
+          formatEther(
+            countsData.CDN.deposits.arbitrationCost +
+              countsData.CDN.deposits.submissionBaseDeposit
+          )}{' '}
+        xDAI
+      </SubmitButton>
     </AddContainer>
   )
 }

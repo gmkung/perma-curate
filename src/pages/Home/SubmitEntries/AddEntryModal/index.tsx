@@ -6,6 +6,7 @@ import { useSearchParams } from 'react-router-dom'
 import AddAddressTag from './AddTag'
 import AddToken from './AddToken'
 import AddCDN from './AddCDN'
+import { StyledCloseButton } from '../..'
 
 const ModalOverlay = styled.div`
   position: fixed;
@@ -43,7 +44,11 @@ export const AddContainer = styled.div`
 `
 
 export const AddHeader = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
   margin-bottom: 20px;
+  gap: 24px;
 `
 
 export const AddTitle = styled.h2`
@@ -103,37 +108,10 @@ export const Buttons = styled.div`
   gap: 16px;
 `
 
-export const StyledReturnButton = styled.button`
-  background-color: #9f7aea;
-  color: white;
-  padding: 12px 24px;
-  font-family: 'Oxanium', sans-serif;
-  font-size: 16px;
-  font-weight: 700;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #8e6ac1;
-  }
-
-  &:disabled {
-    background-color: #e2d8f0;
-    color: #c7c7c7;
-    cursor: not-allowed;
-  }
-
-  ${landscapeStyle(
-    () => css`
-      padding: 12px 48px;
-    `
-  )}
-`
-
 export const SubmitButton = styled.button`
   background-color: #3182ce;
+  width: 220px;
+  align-self: center;
   color: white;
   padding: 12px 24px;
   font-family: 'Oxanium', sans-serif;
@@ -166,7 +144,7 @@ export const ErrorMessage = styled.div`
   font-size: 14px;
 `
 
-export const ReturnButton = () => {
+export const CloseButton = () => {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const closeModal = () => {
@@ -178,9 +156,7 @@ export const ReturnButton = () => {
     })
   }
 
-  return (
-    <StyledReturnButton onClick={() => closeModal()}>Back</StyledReturnButton>
-  )
+  return <StyledCloseButton onClick={() => closeModal()} />
 }
 
 const AddEntryModal: React.FC = () => {
